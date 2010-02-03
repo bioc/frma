@@ -1,0 +1,12 @@
+Package: frma
+Version: 0.99.0
+Date: 2010-01-31
+Title: Frozen RMA
+Description: Preprocessing for single arrays and array batches
+Author: Matthew N. McCall <mmccall@jhsph.edu>
+Maintainer: Matthew N. McCall <mmccall@jhsph.edu>
+Depends: R (>= 2.10.0), Biobase (>= 2.6.0)
+Imports: Biobase, MASS, affy, methods, preprocessCore, utils, frmaExampleData
+biocViews: Software, Microarray, Preprocessing
+License: GPL (>= 2)
+URL: http://bioconductor.org

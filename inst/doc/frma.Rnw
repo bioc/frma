@@ -1,0 +1,189 @@
+% automatic manuscript creation for frma
+% -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
+%\VignetteIndexEntry{frma: Preprocessing for single arrays and array batches}
+%\VignetteDepends{frma}
+%\VignettePackage{frma}
+\documentclass[12pt]{article}
+\usepackage{hyperref}
+\usepackage[authoryear, round]{natbib}
+
+\textwidth=6.2in
+\textheight=8.5in
+\parskip=.3cm
+\oddsidemargin=.1in
+\evensidemargin=.1in
+\headheight=-.3in
+
+\newcommand\Rpackage[1]{{\textsf{#1}\index{#1 (package)}}}
+\newcommand\dataset[1]{{\textit{#1}\index{#1 (data set)}}}
+\newcommand\Rclass[1]{{\textit{#1}\index{#1 (class)}}}
+\newcommand\Rfunction[1]{{{\small\texttt{#1}}\index{#1 (function)}}}
+\newcommand\Rfunarg[1]{{\small\texttt{#1}}}
+\newcommand\Robject[1]{{\small\texttt{#1}}}
+
+\author{Matthew N. McCall}
+
+\begin{document}
+\title{Preprocessing Algorithm for Single Microarrays and Microarray Batches (frma)}
+\maketitle
+\tableofcontents
+
+\section{Introduction}
+Frozen RMA (fRMA) is a microarray preprocessing algorithm that allows
+one to analyze microarrays individually or in small batches and then
+combine the data for analysis. This is accomplished by utilizing
+information from the large publicly available microarray databases. In
+particular, estimates of probe-specific effects and variances are
+precomputed and frozen. Then, with new data sets, these are used in
+concert with information from the new array(s) to normalize and
+summarize the data. 
+
+This document describes \Rpackage{frma}, which implements the methods
+proposed in the paper, \emph{Matthew N. McCall, Benjamin M. Bolstad,
+and Rafael A. Irizarry, ``FROZEN ROBUST MULTI-ARRAY ANALYSIS (fRMA)''
+(May 2009). Johns Hopkins University, Dept. of Biostatistics Working
+Papers. Working Paper 189.} Ideally someone interested in using this
+package would first read that paper and then proceed to the sections
+below.
+
+\section{Getting Started}
+
+If all you want is to go from probe level data ({\it CEL} files) to
+expression measures here are some quick ways.
+
+\subsection{Single Array: Median Polish}
+If you want a quick single array version of RMA using median polish,
+the quickest way of reading in data and getting expression measures is
+the following:
+\begin{enumerate}
+\item Download and install frma and the appropriate data file (i.e. hgu133afrmavecs, hgu133plus2frmavecs, etc.).
+\item Create a directory and move all the relevant
+{\it CEL} files to that directory.
+\item If using linux/unix, start R in that directory.
+\item If using the Rgui for 
+Microsoft Windows make sure your working directory contains the {\it
+CEL} files (use ``File -> Change Dir'' menu item).
+\item Load the library.
+<<echo=T,results=hide>>=
+library(frma)
+@ 
+\item Read in the data and preprocess using the ``median\_polish'' option.
+<<echo=T,results=hide>>=
+library(frmaExampleData)
+data(AffyBatchExample)
+object <- frma(AffyBatchExample, summarize="median_polish")
+@ 
+\end{enumerate}
+
+\subsection{Single Array: Robust Weighted Average}
+If you want the robust single array method described in the fRMA
+paper, the quickest way of reading in data and getting expression
+measures is the following:
+\begin{enumerate}
+\item Download and install frma and the appropriate data file (i.e. hgu133afrmavecs, hgu133plus2frmavecs, etc.).
+\item Create a directory and move all the relevant
+{\it CEL} files to that directory.
+\item If using linux/unix, start R in that directory.
+\item If using the Rgui for 
+Microsoft Windows make sure your working directory contains the {\it
+CEL} files (use ``File -> Change Dir'' menu item).
+\item Load the library.
+<<echo=T,results=hide>>=
+library(frma)
+@ 
+\item Read in the data and preprocess using the ``robust\_weighted\_average'' option.
+<<echo=T,results=hide>>=
+library(frmaExampleData)
+data(AffyBatchExample)
+object <- frma(AffyBatchExample, summarize="robust_weighted_average")
+@ 
+\end{enumerate}
+
+\subsection{Multiple Arrays: Batch Effect Adjusted}
+If you want the batch effect adjustment method described in the fRMA
+paper, the quickest way of reading in data and getting expression
+measures is the following:
+\begin{enumerate}
+\item Download and install frma and the appropriate data file (i.e. hgu133afrmavecs, hgu133plus2frmavecs, etc.).
+\item Create a directory and move all the relevant
+{\it CEL} files to that directory.
+\item If using linux/unix, start R in that directory.
+\item If using the Rgui for 
+Microsoft Windows make sure your working directory contains the {\it
+CEL} files (use ``File -> Change Dir'' menu item).
+\item Load the library.
+<<echo=T,results=hide>>=
+library(frma)
+@ 
+\item Read in the data and preprocess using the ``batch'' option.
+<<echo=T,results=hide>>=
+library(frmaExampleData)
+data(AffyBatchExample)
+object <- frma(AffyBatchExample, summarize="batch")
+@ 
+\end{enumerate}
+
+In each of the cases above, the final \Robject{object} will be an
+ExpressionSet. To obtain a matrix of gene-level expression values,
+enter the following command:
+<<echo=T,results=hide>>=
+e <- exprs(object)
+@ 
+
+Depending on the size of your dataset and on the memory available to
+your system, you might experience errors like `Cannot allocate vector
+\ldots'.  An obvious option is to increase the memory available to
+your R process (by adding memory and/or closing external
+applications). You might also consider analyzing the data in smaller
+batches.
+
+\section{Advanced Options}
+\subsection{Summarization Methods}
+\emph{Summarization} refers to the method used to combine probe-level
+expression values to obtain gene-level expression estimates. There are
+several summarization methods that one can choose from when running
+frma. A brief description of each of the methods follow:
+\begin{itemize}
+  \item {\bf{average}:} compute the mean of the probes in each probeset
+  \item {\bf{median}:} compute the median of the probes in each probeset
+  \item {\bf{median polish}:} subtract the probe-effect and then compute the median of the probes in each probeset
+  \item {\bf{weighted average}:} compute a weighted average of the probes in each probeset with weights equal to the inverse of the sum of the precomputed within and between batch variance estimates.
+  \item {\bf{robust weighted average}:} compute a weighted average of the probes in each probeset with weights equal to the weights returned by an M-estimation procedure divided by the sum of the precomputed within and between batch variance estimates. 
+  \item {\bf{batch}:} the robust weighted average method adapted for a batch of new arrays.
+\end{itemize}
+
+For a more in depth description of the final two methods, see
+\emph{Matthew N. McCall, Benjamin M. Bolstad, and Rafael A. Irizarry,
+``FROZEN ROBUST MULTI-ARRAY ANALYSIS (fRMA)'' (May 2009). Johns
+Hopkins University, Dept. of Biostatistics Working Papers. Working
+Paper 189.}
+
+\subsection{Input Vectors}
+While the vast majority of users will want to stick to the precomputed vectors provided in the frmavecs packages, the frma function will accept user-supplied vectors. These should be given in a list with elements normVec, probeVec, probeVarBetween, probeVarWithin, and probesetSD. A description of each of these elements follows:
+\begin{itemize}
+  \item {\bf{normVec}:} a vector containing values of the reference distribution to which samples will be quantile normalized.
+  \item {\bf{probeVec}:} a vector of probe-effect estimates.
+  \item {\bf{probeVarBetween}:} a vector of the between batch variance for each probe.
+  \item {\bf{probeVarWithin}:} a vector of the within batch variance for each probe.
+  \item {\bf{probesetSD}:} a vector of average within probeset standard deviations.
+\end{itemize}
+
+For further information on how these vectors are computed in the frmavecs packages, see the frmaTools package.
+
+\subsection{Output Parameters}
+While the default is to only return the gene-level expression
+estimates, the frma function can also return additional information
+about the estimates depending on the summarization method chosen. A
+description of the arguments that can be included in the output.param
+argument follows:
+\begin{itemize}
+  \item {\bf{stderr}:} the standard errors of the gene-level expression estimates.
+  \item {\bf{weights}:} the weights from the M-estimation procedure.
+  \item {\bf{residuals}:} the residuals from fitting the probe-level model.
+\end{itemize}
+
+Not all of these outputs are available for all of the summarization
+methods; however, all three are available for the default summarization procedure -- robust weighted average.
+
+\end{document}
+
