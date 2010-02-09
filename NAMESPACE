@@ -14,7 +14,7 @@ importFrom(preprocessCore, normalize.quantiles.use.target, rcModelWPLM,
 importFrom(utils, data)
 importFrom(methods, is, callNextMethod, new)
 
-export(frma)
+export(frma, barcode)
 exportClasses(frmaExpressionSet)
 exportMethods(initialize, se.exprs, weights, residuals, as.ExpressionSet)
 

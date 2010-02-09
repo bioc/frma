@@ -24,11 +24,11 @@
 \author{Matthew N. McCall}
 
 \begin{document}
-\title{Preprocessing Algorithm for Single Microarrays and Microarray Batches (frma)}
+\title{Preprocessing and Barcoding of Single Microarrays and Microarray Batches (frma)}
 \maketitle
 \tableofcontents
 
-\section{Introduction}
+\section{Frozen Robust Multiarray Analysis (fRMA)}
 Frozen RMA (fRMA) is a microarray preprocessing algorithm that allows
 one to analyze microarrays individually or in small batches and then
 combine the data for analysis. This is accomplished by utilizing
@@ -38,7 +38,7 @@ precomputed and frozen. Then, with new data sets, these are used in
 concert with information from the new array(s) to normalize and
 summarize the data. 
 
-This document describes \Rpackage{frma}, which implements the methods
+This section describes \Rfunction{frma}, which implements the methods
 proposed in the paper, \emph{Matthew N. McCall, Benjamin M. Bolstad,
 and Rafael A. Irizarry, ``FROZEN ROBUST MULTI-ARRAY ANALYSIS (fRMA)''
 (May 2009). Johns Hopkins University, Dept. of Biostatistics Working
@@ -46,12 +46,12 @@ Papers. Working Paper 189.} Ideally someone interested in using this
 package would first read that paper and then proceed to the sections
 below.
 
-\section{Getting Started}
+\subsection{Getting Started}
 
 If all you want is to go from probe level data ({\it CEL} files) to
 expression measures here are some quick ways.
 
-\subsection{Single Array: Median Polish}
+\subsubsection{Single Array: Median Polish}
 If you want a quick single array version of RMA using median polish,
 the quickest way of reading in data and getting expression measures is
 the following:
@@ -75,7 +75,7 @@ object <- frma(AffyBatchExample, summarize="median_polish")
 @ 
 \end{enumerate}
 
-\subsection{Single Array: Robust Weighted Average}
+\subsubsection{Single Array: Robust Weighted Average}
 If you want the robust single array method described in the fRMA
 paper, the quickest way of reading in data and getting expression
 measures is the following:
@@ -99,7 +99,7 @@ object <- frma(AffyBatchExample, summarize="robust_weighted_average")
 @ 
 \end{enumerate}
 
-\subsection{Multiple Arrays: Batch Effect Adjusted}
+\subsubsection{Multiple Arrays: Batch Effect Adjusted}
 If you want the batch effect adjustment method described in the fRMA
 paper, the quickest way of reading in data and getting expression
 measures is the following:
@@ -137,8 +137,8 @@ your R process (by adding memory and/or closing external
 applications). You might also consider analyzing the data in smaller
 batches.
 
-\section{Advanced Options}
-\subsection{Summarization Methods}
+\subsection{Advanced Options}
+\subsubsection{Summarization Methods}
 \emph{Summarization} refers to the method used to combine probe-level
 expression values to obtain gene-level expression estimates. There are
 several summarization methods that one can choose from when running
@@ -158,7 +158,7 @@ For a more in depth description of the final two methods, see
 Hopkins University, Dept. of Biostatistics Working Papers. Working
 Paper 189.}
 
-\subsection{Input Vectors}
+\subsubsection{Input Vectors}
 While the vast majority of users will want to stick to the precomputed vectors provided in the frmavecs packages, the frma function will accept user-supplied vectors. These should be given in a list with elements normVec, probeVec, probeVarBetween, probeVarWithin, and probesetSD. A description of each of these elements follows:
 \begin{itemize}
   \item {\bf{normVec}:} a vector containing values of the reference distribution to which samples will be quantile normalized.
@@ -170,7 +170,7 @@ While the vast majority of users will want to stick to the precomputed vectors p
 
 For further information on how these vectors are computed in the frmavecs packages, see the frmaTools package.
 
-\subsection{Output Parameters}
+\subsubsection{Output Parameters}
 While the default is to only return the gene-level expression
 estimates, the frma function can also return additional information
 about the estimates depending on the summarization method chosen. A
@@ -184,6 +184,77 @@ argument follows:
 
 Not all of these outputs are available for all of the summarization
 methods; however, all three are available for the default summarization procedure -- robust weighted average.
+
+\section{Creation of Gene Expression Barcodes}
+The barcode algorithm is designed to estimate which genes are
+expressed and which are unexpressed in a given microarray
+hybridization. This is accopmlished by: (1) using the distribution of
+observed $log_2$ intensities across a wide variety of tissues to
+estimate an expressed and an unexpressed distribution for each gene,
+and (2) for each gene in a sample, denoting it as expressed if its
+observed $log_2$ intensity is more likely under the expressed
+distribution than under the unexpressed distribution and as
+unexpressed otherwise. The first step is accomplished by fitting a
+hierarchical mixture model to the plethora of publicly available
+data. The second step is accomplished by determining where the
+observed intensities from the new array fall in these
+distributions. The output of our algorithm is a vector of ones and
+zeros denoting which genes are estimated to be expressed (ones) and
+unexpressed (zeros). We call this a \emph{gene expression barcode}.
+
+This section describes \Rfunction{barcode}, which implements the
+methods proposed in the paper, \emph{Matthew N. McCall, Michael
+J. Zilliox, and Rafael A. Irizarry, ``Gene Expression Barcodes Based
+on Data from 8,277 Microarrays'' (October 2009). Johns Hopkins
+University, Dept. of Biostatistics Working Papers. Working Paper 200.}
+Ideally someone interested in using this package would first read that
+paper and then proceed to the sections below.
+
+\subsection{Getting Started}
+To create a gene expression barcode, one needs estimates of the gene
+expression distributions -- specifically the mean and variance of the
+unexpressed distribution for each gene. Fortunately, we have
+precomputed these for 3 popular Affymetrix microarray platforms --
+hgu133a, hgu133plus2, and mouse4302. To use one of these 3, simply
+preprocess your data using the default options of \Rfunction{frma} and
+then run \Rfunction{barcode} on the resulting object.
+
+\subsubsection{Example}
+\begin{enumerate}
+\item Download and install the frma package and the appropriate data
+packages (i.e. hgu133afrmavecs and hgu133abarcodevecs).
+\item Create a directory and move all the relevant
+{\it CEL} files to that directory.
+\item If using linux/unix, start R in that directory.
+\item If using the Rgui for Microsoft Windows make sure your working
+directory contains the {\it CEL} files (use ``File -> Change Dir''
+menu item).
+\item Load the libraries.
+<<echo=T,results=hide>>=
+library(frma)
+@ 
+\item Read in the data and preprocess using the default options.
+<<echo=T,results=hide>>=
+library(frmaExampleData)
+data(AffyBatchExample)
+object <- frma(AffyBatchExample)
+@ 
+\item Create a gene expression barcode.
+<<echo=T,results=hide>>=
+bc <- barcode(object)
+@ 
+\end{enumerate}
+
+\subsection{Output Options}
+
+The default output of the \Rfunction{barcode} function is to return a vector of ones (expressed) and zeros (unexpressed); however, there are alternative output options. A brief description of each of these follows:
+\begin{itemize}
+  \item {\bf{weight}:} a vector of weights which roughly correspond to the probability of expression for each gene.
+  \item {\bf{z-score}:} a vector of z-scores under the unexpressed normal distribution for each gene.
+  \item {\bf{p-value}:} a vector of p-values under the unexpressed normal distributionfor each gene.
+\end{itemize}
+
+
 
 \end{document}
 
