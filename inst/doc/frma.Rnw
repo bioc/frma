@@ -1,7 +1,7 @@
 % automatic manuscript creation for frma
 % -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
 %\VignetteIndexEntry{frma: Preprocessing for single arrays and array batches}
-%\VignetteDepends{frma}
+%\VignetteDepends{frma, hgu133afrmavecs, hgu133abarcodevecs, frmaExampleData}
 %\VignettePackage{frma}
 \documentclass[12pt]{article}
 \usepackage{hyperref}
