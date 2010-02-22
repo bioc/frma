@@ -1,4 +1,4 @@
-barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, p=0.5, output="binary", verbose=FALSE){
+barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, p=0.5, output="binary"){
 
   if(!class(object) %in% c("matrix", "ExpressionSet", "frmaExpressionSet") & !is.vector(object)) stop("Object must be one of: vector, matrix, ExpressionSet, or frmaExpressionSet.")
 
@@ -43,51 +43,27 @@ barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, p=0.5, output="bin
   num <- round(nrow(e)/10)
   
   if(output == "p-value"){
-    pval <- matrix(nrow=nrow(e), ncol=ncol(e))
-    for(i in 1:nrow(e)){
-      for(j in 1:ncol(e)){
-        pval[i,j] <- pnorm(e[i,j], mean=mu[i], sd=tau[i], lower.tail=FALSE)
-      }
-      if(verbose==TRUE){
-        if(i%%num==0) message(paste((i/num)*10,"%",sep=""))
-      }
-    }
+    pval <- pnorm(e, mean=mu, sd=tau, lower.tail=FALSE)
     colnames(pval) <- colnames(e)
     rownames(pval) <- rownames(e)
     return(pval)
   }
 
   if(output == "z-score"){
-    z <- matrix(nrow=nrow(e), ncol=ncol(e))
-    for(i in 1:nrow(e)){
-      for(j in 1:ncol(e)){
-        z[i,j] <- (e[i,j] - mu[i]) / tau[i]
-      }
-      if(verbose==TRUE){
-        if(i%%num==0) message(paste((i/num)*10,"%",sep=""))
-      }
-    }
+    z <- sweep(sweep(e, 1, mu), 1, tau, FUN="/")
     colnames(z) <- colnames(e)
     rownames(z) <- rownames(e)
     return(z)
   }
   
   if(output %in% c("binary", "weight")){
-    w <- matrix(nrow=nrow(e), ncol=ncol(e))
-    for(i in 1:nrow(e)){
-      for(j in 1:ncol(e)){
-        unf <- dunif(e[i,j],mu[i],15)
-        nrm <- dnorm(e[i,j], mean=mu[i], sd=tau[i])
-        if(nrm == 0 & unf == 0) w[i,j] <- 0 else w[i,j] <- (p*unf) / ((p*unf) + ((1-p)*nrm))
-      }
-      if(verbose==TRUE){
-        if(i%%num==0) message(paste((i/num)*10,"%",sep=""))
-      }
-    }
+    unf <- dunif(e, mu, 15)
+    nrm <- dnorm(e, mean=mu, sd=tau)
+    w <- matrix(ifelse(nrm==0 & unf==0, 0, (p*unf) / ((p*unf) + ((1-p)*nrm))), nrow=nrow(e), ncol=ncol(e))
   }
-    
+
   if(output == "binary"){
-    bc <- matrix(as.numeric(w>0.5), ncol=ncol(w))
+    bc <- matrix(as.integer(w>0.5), ncol=ncol(w))
     colnames(bc) <- colnames(e)
     rownames(bc) <- rownames(e)
     return(bc)
