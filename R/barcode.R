@@ -42,7 +42,7 @@ barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=5, output="
   e <- object
   num <- round(nrow(e)/10)
   
-  if(output %in% c("p-value", "lod", "binary"){
+  if(output %in% c("p-value", "lod", "binary")){
     pval <- pnorm(e, mean=mu, sd=tau, lower.tail=FALSE)
     if(output == "p-value"){
       colnames(pval) <- colnames(e)
@@ -62,7 +62,7 @@ barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=5, output="
     }
   }
 
-  if(output %in% c("z-score"){
+  if(output == "z-score"){
     z <- sweep(sweep(e, 1, mu), 1, tau, FUN="/")
     colnames(z) <- colnames(e)
     rownames(z) <- rownames(e)
