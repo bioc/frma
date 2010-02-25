@@ -58,6 +58,7 @@ barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=5, output="
         bc <- matrix(as.integer(lod > cutoff), ncol=ncol(e))
         colnames(bc) <- colnames(e)
         rownames(bc) <- rownames(e)
+        return(bc)
       }
     }
   }
