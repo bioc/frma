@@ -1,4 +1,4 @@
-barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, p=0.5, output="binary"){
+barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=5, output="binary"){
 
   if(!class(object) %in% c("matrix", "ExpressionSet", "frmaExpressionSet") & !is.vector(object)) stop("Object must be one of: vector, matrix, ExpressionSet, or frmaExpressionSet.")
 
@@ -42,34 +42,37 @@ barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, p=0.5, output="bin
   e <- object
   num <- round(nrow(e)/10)
   
-  if(output == "p-value"){
+  if(output %in% c("p-value", "lod", "binary"){
     pval <- pnorm(e, mean=mu, sd=tau, lower.tail=FALSE)
-    colnames(pval) <- colnames(e)
-    rownames(pval) <- rownames(e)
-    return(pval)
+    if(output == "p-value"){
+      colnames(pval) <- colnames(e)
+      rownames(pval) <- rownames(e)
+      return(pval)
+    } else{
+      lod <- -log10(pval)
+      if(output == "lod"){
+        colnames(lod) <- colnames(e)
+        rownames(lod) <- rownames(e)
+        return(lod)
+      } else{
+        bc <- matrix(as.integer(lod > cutoff), ncol=ncol(e))
+        colnames(bc) <- colnames(e)
+        rownames(bc) <- rownames(e)
+      }
+    }
   }
 
-  if(output == "z-score"){
+  if(output %in% c("z-score"){
     z <- sweep(sweep(e, 1, mu), 1, tau, FUN="/")
     colnames(z) <- colnames(e)
     rownames(z) <- rownames(e)
     return(z)
   }
   
-  if(output %in% c("binary", "weight")){
+  if(output == "weight"){
     unf <- dunif(e, mu, 15)
     nrm <- dnorm(e, mean=mu, sd=tau)
     w <- matrix(ifelse(nrm==0 & unf==0, 0, (p*unf) / ((p*unf) + ((1-p)*nrm))), nrow=nrow(e), ncol=ncol(e))
-  }
-
-  if(output == "binary"){
-    bc <- matrix(as.integer(w>0.5), ncol=ncol(w))
-    colnames(bc) <- colnames(e)
-    rownames(bc) <- rownames(e)
-    return(bc)
-  }
-  
-  if(output == "weight"){
     colnames(w) <- colnames(e)
     rownames(w) <- rownames(e)
     return(w)
