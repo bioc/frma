@@ -2,7 +2,7 @@ barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=5, output="
 
   if(!class(object) %in% c("matrix", "ExpressionSet", "frmaExpressionSet") & !is.vector(object)) stop("Object must be one of: vector, matrix, ExpressionSet, or frmaExpressionSet.")
 
-  if(!output %in% c("binary", "weight", "z-score", "p-value")) stop("Output must be one of: binary, weight, z-score, p-value.") 
+  if(!output %in% c("binary", "weight", "z-score", "p-value", "lod")) stop("Output must be one of: binary, weight, z-score, p-value, lod.") 
 
   if(is.vector(object)) object <- as.matrix(object)
   
