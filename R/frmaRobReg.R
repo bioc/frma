@@ -52,8 +52,13 @@ frmaRobReg <- function(object, background, normalize, summarize, input.vecs, out
 
   if(summarize == "robust_weighted_average"){
     w <- 1/(input.vecs$probeVarWithin + input.vecs$probeVarBetween)
-    tmp <- split(data.frame(pms, w, input.vecs$probeVec, rep(input.vecs$probesetSD, table(pns))), pns)
-    fit <- lapply(tmp, rwaFit)
+    N <- 1:dim(pms)[1]
+    S <- split(N, pns)
+    fit <- lapply(1:length(S), function(i) {
+	s <- S[[i]]
+	rwaFit2(pms[s,, drop=FALSE], w[s], input.vecs$probeVec[s], input.vecs$probesetSD[i])
+    })
+    names(fit) <- unique(pns)
     exprs <- matrix(unlist(lapply(fit, function(x) x$Estimates)), ncol=ncol(pms), byrow=TRUE)
     rownames(exprs) <- names(fit)
     colnames(exprs) <- colnames(pms)
@@ -81,12 +86,12 @@ frmaRobReg <- function(object, background, normalize, summarize, input.vecs, out
   return(list(exprs=exprs, stderr=stderr, weights=weights, residuals=residuals))
 }
 
-rwaFit <- function(x){
-  pms.tmp <- as.matrix(x[,1:(ncol(x)-3)])
-  w.tmp <- x$w/max(x$w)
-  w.tmp <- matrix(rep(w.tmp,ncol(pms.tmp)), ncol=ncol(pms.tmp))
-  pe.tmp <- x$input.vecs.probeVec
+rwaFit2 <- function(x1, x2, x3, x4){
+  ncols <- ncol(x1)
+  w.tmp <- x2/max(x2)
+  w.tmp <- matrix(rep(w.tmp, ncols), ncol=ncols)
+  pe.tmp <- x3
   pe.tmp[1] <- pe.tmp[1]-sum(pe.tmp)
-  psd.tmp <- x$probesetSD[1]
-  rcModelWPLM(y=pms.tmp, w=w.tmp, row.effects=pe.tmp, input.scale=psd.tmp)
+  rcModelWPLM(y=x1, w=w.tmp, row.effects=pe.tmp, input.scale=x4)
 }
+
