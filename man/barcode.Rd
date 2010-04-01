@@ -6,7 +6,7 @@
   expression barcode.
 }
 \usage{
-  barcode(object, platform=NULL, mu=NULL, tau=NULL, cutoff=5, output="binary")
+  barcode(object, platform=NULL, mu=NULL, tau=NULL, cutoff=6.5, output="binary")
 }
 \arguments{
   \item{object}{a vector or matrix of expression values or an

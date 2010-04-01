@@ -1,4 +1,4 @@
-barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=5, output="binary"){
+barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=6.5, output="binary"){
 
   if(!class(object) %in% c("matrix", "ExpressionSet", "frmaExpressionSet") & !is.vector(object)) stop("Object must be one of: vector, matrix, ExpressionSet, or frmaExpressionSet.")
 
