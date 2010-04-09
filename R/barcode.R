@@ -14,7 +14,7 @@ barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=6.5, output
     if(is.null(platform)) stop("If object is of class matrix, platform cannot be NULL.")
     if(!platform %in% c("GPL96", "GPL570", "GPL1261")) stop("Platform must be one of: GPL96, GPL570, GPL1261")
   } else{
-    if(annotation(object) %in% c("hgu133a", "hgu133plus2", "moe430_2")){
+    if(annotation(object) %in% c("hgu133a", "hgu133plus2", "mouse4302")){
       if(cleancdfname(annotation(object)) == "hgu133acdf") platform <- "GPL96"
       if(cleancdfname(annotation(object)) == "hgu133plus2cdf") platform <- "GPL570"
       if(cleancdfname(annotation(object)) == "mouse4302cdf") platform <- "GPL1261"
