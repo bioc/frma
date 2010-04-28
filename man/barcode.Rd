@@ -19,7 +19,7 @@
     NULL then precomputed values are used.}
   \item{cutoff}{the lod score cutoff used if output is binary.}
   \item{output}{the desired values to be returned. Options are: p-value,
-    z-score, lod, binary, or weight.}
+    z-score, lod, or binary.}
 }
 \value{
   A matrix containing the type of output specified by the output
@@ -29,9 +29,7 @@
   under the unexpressed distribution. The option \emph{lod} returns the
   LOD scores for expression values under the unexpressed
   distribution. The option \emph{z-score} returns the z-scores for the
-  expression values under the unexpressed distribution. The option
-  \emph{weight} returns weights which roughly correspond to the
-  probability of expression for each gene.  
+  expression values under the unexpressed distribution. 
 }
 \author{Matthew N. McCall}
 \examples{

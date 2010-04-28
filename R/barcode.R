@@ -2,7 +2,7 @@ barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=6.5, output
 
   if(!class(object) %in% c("matrix", "ExpressionSet", "frmaExpressionSet") & !is.vector(object)) stop("Object must be one of: vector, matrix, ExpressionSet, or frmaExpressionSet.")
 
-  if(!output %in% c("binary", "weight", "z-score", "p-value", "lod")) stop("Output must be one of: binary, weight, z-score, p-value, lod.") 
+  if(!output %in% c("binary", "z-score", "p-value", "lod")) stop("Output must be one of: binary, z-score, p-value, lod.") 
 
   if(is.vector(object)) object <- as.matrix(object)
   
@@ -68,14 +68,5 @@ barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=6.5, output
     colnames(z) <- colnames(e)
     rownames(z) <- rownames(e)
     return(z)
-  }
-  
-  if(output == "weight"){
-    unf <- dunif(e, mu, 15)
-    nrm <- dnorm(e, mean=mu, sd=tau)
-    w <- matrix(ifelse(nrm==0 & unf==0, 0, (p*unf) / ((p*unf) + ((1-p)*nrm))), nrow=nrow(e), ncol=ncol(e))
-    colnames(w) <- colnames(e)
-    rownames(w) <- rownames(e)
-    return(w)
   }
 }
