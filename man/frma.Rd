@@ -30,12 +30,7 @@ frma(object, background="rma", normalize="quantile",
     while the function runs.}
 }
 \value{
-  The function returns either an ExpressionSet or a frmaExpressionSet
-  object depending on the elements of output.param. The assayData field
-  of these objects contains the expression values (exprs) and optionally
-  the standard errors (se.exprs). A frmaExpressionSet contains two
-  further optional fields: the weights used in the summarization step
-  (weights) and the residuals from fitting the probe-level model (residuals).
+  The function returns a PLMset.
 }
 \author{Matthew N. McCall}
 \examples{

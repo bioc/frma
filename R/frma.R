@@ -13,20 +13,23 @@ frma <- function(object, background="rma", normalize="quantile", summarize="robu
   if(summarize %in% c("average", "median", "weighted_average", "robust_weighted_average")) output <- frmaRobReg(object, background, normalize, summarize, input.vecs, output.param, verbose)
   if(summarize == "batch") output <- frmaBatch(object, background, normalize, input.vecs, output.param, verbose)
 
-  if(is.null(output.param)){
-    e <- new("ExpressionSet", exprs=output$exprs, annotation=annotation(object))
-  } else if("stderr" %in% output.param & length(output.param)==1){
-    e <- new("ExpressionSet", assayData=assayDataNew(exprs=output$exprs, se.exprs=output$stderr), annotation=annotation(object))
-  } else{
-    if("stderr" %in% output.param){
-      e <- new("frmaExpressionSet", assayData=assayDataNew(exprs=output$exprs, se.exprs=output$stderr), annotation=annotation(object))
-    } else{
-      e <- new("frmaExpressionSet", exprs=output$exprs, annotation=annotation(object))
-    }
-    if("weights" %in% output.param) e@weights <- output$weights
-    if("residuals" %in% output.param) e@residuals <- output$residuals
-  }
+  if("stderr" %in% output.param) stderr <- output$stderr else stderr <- matrix(nrow=0, ncol=0)
+  if("weights" %in% output.param) w <- output$weights else w <- matrix(nrow=0, ncol=0)
+  if("residuals" %in% output.param) r <- output$residuals else r <- matrix(nrow=0, ncol=0)
+
+  R.model <- PLM.designmatrix3(object)
   
-  return(e)
+  new("PLMset",
+      chip.coefs=output$exprs,
+      weights=list("PM.weights"=w, "MM.weights"=matrix(nrow=0, ncol=0)),
+      se.chip.coefs=stderr,
+      residuals=list("PM.resid"=r, "MM.resid"=matrix(nrow=0, ncol=0)),
+      cdfName = object@cdfName,
+      phenoData = phenoData(object),
+      annotation = annotation(object),
+      experimentData = experimentData(object),
+      nrow= object@nrow,
+      ncol= object@ncol,
+      narrays=length(object),
+      model.description = list("R.model"=R.model))
 }
-  

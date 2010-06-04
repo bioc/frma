@@ -1,6 +1,8 @@
 importClassesFrom(Biobase, AnnotatedDataFrame, AssayData, eSet,
                   ExpressionSet, MIAME, Versioned, VersionedBiobase,
                   Versions)
+importClassesFrom(affy)
+importClassesFrom(affyPLM, PLMset)
 importClassesFrom(methods, character, matrix)
 importMethodsFrom(methods, initialize)
 importMethodsFrom(Biobase, annotatedDataFrameFrom, exprs, annotation, sampleNames)
@@ -14,7 +16,5 @@ importFrom(preprocessCore, normalize.quantiles.use.target, rcModelWPLM,
 importFrom(utils, data)
 importFrom(methods, is, callNextMethod, new)
 
-export(frma, barcode)
-exportClasses(frmaExpressionSet)
-exportMethods(initialize, se.exprs, weights, residuals, as.ExpressionSet)
+export(frma, barcode, GNUSE)
 

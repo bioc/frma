@@ -10,7 +10,7 @@
 }
 \arguments{
   \item{object}{a vector or matrix of expression values or an
-    ExpressionSet or frmaExpressionSet produced by frma}
+    ExpressionSet or PLMset produced by frma}
   \item{platform}{the platform of the input data. One of GPL96, GPL570,
     GPL1261. Required if object is a vector or matrix.}
   \item{mu}{the mean of the unexpressed distribution. If NULL then

@@ -113,21 +113,21 @@ Microsoft Windows make sure your working directory contains the {\it
 CEL} files (use ``File -> Change Dir'' menu item).
 \item Load the library.
 <<echo=T,results=hide>>=
-library(frma)
+##library(frma)
 @ 
 \item Read in the data and preprocess using the ``batch'' option.
 <<echo=T,results=hide>>=
-library(frmaExampleData)
-data(AffyBatchExample)
-object <- frma(AffyBatchExample, summarize="batch")
+##library(frmaExampleData)
+##data(AffyBatchExample)
+##object <- frma(AffyBatchExample, summarize="batch")
 @ 
 \end{enumerate}
 
-In each of the cases above, the final \Robject{object} will be an
-ExpressionSet. To obtain a matrix of gene-level expression values,
-enter the following command:
+In each of the cases above, the final \Robject{object} will be a
+PLMset. To obtain a matrix of gene-level expression values, enter the
+following command:
 <<echo=T,results=hide>>=
-e <- exprs(object)
+e <- coefs(object)
 @ 
 
 Depending on the size of your dataset and on the memory available to

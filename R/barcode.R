@@ -1,25 +1,32 @@
 barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=6.5, output="binary"){
 
-  if(!class(object) %in% c("matrix", "ExpressionSet", "frmaExpressionSet") & !is.vector(object)) stop("Object must be one of: vector, matrix, ExpressionSet, or frmaExpressionSet.")
+  if(!class(object) %in% c("matrix", "ExpressionSet", "PLMset") & !is.vector(object)) stop("Object must be one of: vector, matrix, ExpressionSet, or PLMset.")
 
   if(!output %in% c("binary", "z-score", "p-value", "lod")) stop("Output must be one of: binary, z-score, p-value, lod.") 
 
   if(is.vector(object)) object <- as.matrix(object)
   
-  if(class(object) == "frmaExpressionSet"){
-    object <- as.ExpressionSet(object)
-  }
-  
   if(is.matrix(object)){
-    if(is.null(platform)) stop("If object is of class matrix, platform cannot be NULL.")
+    if(is.null(platform)) stop("If object is of class matrix or vector, platform cannot be NULL.")
     if(!platform %in% c("GPL96", "GPL570", "GPL1261")) stop("Platform must be one of: GPL96, GPL570, GPL1261")
-  } else{
+  }
+
+  if(class(object)=="ExpressionSet"){
     if(annotation(object) %in% c("hgu133a", "hgu133plus2", "mouse4302")){
       if(cleancdfname(annotation(object)) == "hgu133acdf") platform <- "GPL96"
       if(cleancdfname(annotation(object)) == "hgu133plus2cdf") platform <- "GPL570"
       if(cleancdfname(annotation(object)) == "mouse4302cdf") platform <- "GPL1261"
     } else stop("Microarray platform given by object annotation not recognized -- please supply platform type.")
     object <- as.matrix(exprs(object))
+  }
+
+  if(class(object)=="PLMset"){
+    if(annotation(object) %in% c("hgu133a", "hgu133plus2", "mouse4302")){
+      if(cleancdfname(annotation(object)) == "hgu133acdf") platform <- "GPL96"
+      if(cleancdfname(annotation(object)) == "hgu133plus2cdf") platform <- "GPL570"
+      if(cleancdfname(annotation(object)) == "mouse4302cdf") platform <- "GPL1261"
+    } else stop("Microarray platform given by object annotation not recognized -- please supply platform type.")
+    object <- as.matrix(coefs(object))
   }
 
   i.remove <- grep("AFFX", rownames(object))

@@ -27,9 +27,14 @@ frmaBatch <- function(object, background, normalize, input.vecs, output.param, v
   if(verbose) message("Summarizing ...\n")
   pns <- probeNames(object)
   pms <- log2(pm(object))
-  
-  tmp <- split(data.frame(pms, input.vecs$probeVec, input.vecs$probeVarWithin, input.vecs$probeVarBetween), pns)
-  fit <- lapply(tmp, batchFit)
+
+  N <- 1:dim(pms)[1]
+  S <- split(N, pns)
+
+  fit <- lapply(1:length(S), function(i) {
+    s <- S[[i]]
+    batchFit(pms[s,], input.vecs$probeVec[s], input.vecs$probeVarWithin[s], input.vecs$probeVarBetween[s])
+  })
   
   exprs <- matrix(unlist(lapply(fit, function(x) x$exprs)), ncol=ncol(pms), byrow=TRUE)
   rownames(exprs) <- names(fit)
@@ -58,17 +63,17 @@ frmaBatch <- function(object, background, normalize, input.vecs, output.param, v
   return(list(exprs=exprs, stderr=stderr, weights=weights, residuals=residuals))
 }
 
-batchFit <- function(x){
-  y.new <- as.matrix(x[,1:(ncol(x)-3)]) - x$input.vecs.probeVec
+batchFit <- function(x1, x2, x3, x4){
+  y.new <- x1 - x2
   yy.new <- as.vector(t(y.new))
   X <- matrix(rep(diag(ncol(y.new)),nrow(y.new)), nrow=length(yy.new), byrow=TRUE)
   Z <- diag(nrow(y.new))
   Z <- Z[rep(seq(nrow(Z)), each=ncol(y.new)),]
-  G <- diag(x$input.vecs.probeVarBetween)
-  R <- diag(rep(x$input.vecs.probeVarWithin, each=ncol(y.new)))
+  G <- diag(x4)
+  R <- diag(rep(x3, each=ncol(y.new)))
   V <- Z%*%G%*%t(Z) + R
   Vinv <- solve(V)
-  e <- eigen(Vinv)
+  e <- eigen(Vinv, symmetric=TRUE)
   C <- (e$vectors)%*%diag(sqrt(e$values))%*%t(e$vectors)
   yy.trans <- C%*%yy.new
   x.trans <- C%*%X
