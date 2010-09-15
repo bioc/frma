@@ -6,6 +6,8 @@ frma <- function(object, background="rma", normalize="quantile", summarize="robu
   if(!normalize %in% c("none", "quantile")) stop("normalize must be either none or quantile")
   if(!summarize %in% c("median_polish", "average", "median", "weighted_average", "robust_weighted_average", "batch")) stop("summarize must be one of: median_polish, average, median, weighted_average, robust_weighted_average, batch")
 
+  if(summarize=="batch" & (any(input.vecs$probeVarBetween==0) | any(input.vecs$probeVarWithin==0))) stop("If summarize method is batch then probeVarBetween and probeVarWithin must be greater than zero for all probes.")
+  
   cdfname <- cleancdfname(cdfName(object))
   platform <- gsub("cdf","",cdfname)
 

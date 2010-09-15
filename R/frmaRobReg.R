@@ -43,6 +43,8 @@ frmaRobReg <- function(object, background, normalize, summarize, input.vecs, out
   
   if(summarize == "weighted_average"){  
     w <- 1/(input.vecs$probeVarWithin + input.vecs$probeVarBetween)
+    if(any(input.vecs$probeVarWithin==0) | any(input.vecs$probeVarBetween==0)) warning("Either probeVarWithin or probeVarBetween is 0 for some probes -- setting corresponding weights to 1")
+    w[w==Inf] <- 1
     exprs <- subColSummarizeAvg((pms-input.vecs$probeVec)*w, pns)
     W <- as.vector(rowsum(w, pns, reorder=FALSE))
     exprs <- (exprs/W)*as.vector(rowsum(rep(1,length(pns)),pns,reorder=FALSE))
@@ -52,6 +54,8 @@ frmaRobReg <- function(object, background, normalize, summarize, input.vecs, out
 
   if(summarize == "robust_weighted_average"){
     w <- 1/(input.vecs$probeVarWithin + input.vecs$probeVarBetween)
+    if(any(input.vecs$probeVarWithin==0) | any(input.vecs$probeVarBetween==0)) warning("Either probeVarWithin or probeVarBetween is 0 for some probes -- setting corresponding weights to 1")
+    w[w==Inf] <- 1
     N <- 1:dim(pms)[1]
     S <- split(N, pns)
     fit <- lapply(1:length(S), function(i) {
