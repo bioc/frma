@@ -1,15 +1,41 @@
-frmaRobReg <- function(object, background, normalize, summarize, input.vecs, output.param, verbose){
+frmaRobReg <- function(object, background, normalize, summarize, target, input.vecs, output.param, verbose){
 
-  cdfname <- cleancdfname(cdfName(object))
+  if(class(object)=="AffyBatch") cdfname <- cleancdfname(cdfName(object))
+  if(class(object)=="ExonFeatureSet") cdfname <- annotation(object)
   platform <- gsub("cdf","",cdfname)
   
   if(background == "rma"){
     if(verbose) message("Background Correcting ...\n")
-    object <- bg.correct.rma(object)
+    if(class(object)=="AffyBatch") object <- bg.correct.rma(object)
+    if(class(object)=="ExonFeatureSet") object <- backgroundCorrect(object, verbose=FALSE)
+  }
+
+  if(class(object)=="ExonFeatureSet"){
+    if(target=="probeset"){
+      featureInfo <- getFidProbeset(object)
+    }
+    if(target=="core"){
+      featureInfo <- getFidMetaProbesetCore(object)
+    }
+    if(target=="full"){
+      featureInfo <- getFidMetaProbesetFull(object)
+    }
+    if(target=="extended"){
+      featureInfo <- getFidMetaProbesetExtended(object)
+    }
+
+    pmi <- featureInfo[["fid"]]
+    pns <- as.character(featureInfo[["fsetid"]])
+    pms <- exprs(object)[pmi,, drop=FALSE]
+  }
+  if(class(object)=="AffyBatch"){
+    pms <- pm(object)
+    pns <- probeNames(object)
   }
   
   if(is.null(input.vecs$normVec) | is.null(input.vecs$probeVec) | is.null(input.vecs$probeVarWithin) | is.null(input.vecs$probeVarBetween) | (summarize=="robust_weighted_average" & is.null(input.vecs$probesetSD))){
-    pkg <- paste(platform, "frmavecs", sep="")
+    if(class(object)=="AffyBatch") pkg <- paste(platform, "frmavecs", sep="")
+    if(class(object)=="ExonFeatureSet") pkg <- paste(platform, "frmavecs", target, sep="")
     require(pkg, character.only=TRUE, quiet=TRUE) || stop(paste(pkg, "package must be installed first"))
     data(list=eval(pkg))
 
@@ -22,12 +48,11 @@ frmaRobReg <- function(object, background, normalize, summarize, input.vecs, out
 
   if(normalize == "quantile"){
     if(verbose) message("Normalizing ...\n")
-    pm(object) <- normalize.quantiles.use.target(pm(object), input.vecs$normVec)
+    pms <- normalize.quantiles.use.target(pms, input.vecs$normVec)
   }
 
   if(verbose) message("Summarizing ...\n")
-  pns <- probeNames(object)
-  pms <- log2(pm(object))
+  pms <- log2(pms)
   
   if(summarize == "average"){  
     exprs <- subColSummarizeAvg((pms-input.vecs$probeVec), pns)
@@ -43,7 +68,7 @@ frmaRobReg <- function(object, background, normalize, summarize, input.vecs, out
   
   if(summarize == "weighted_average"){  
     w <- 1/(input.vecs$probeVarWithin + input.vecs$probeVarBetween)
-    if(any(input.vecs$probeVarWithin==0) | any(input.vecs$probeVarBetween==0)) warning("Either probeVarWithin or probeVarBetween is 0 for some probes -- setting corresponding weights to 1")
+    if(any(input.vecs$probeVarWithin==0) | any(input.vecs$probeVarBetween==0)) message("Either probeVarWithin or probeVarBetween is 0 for some probes -- setting corresponding weights to 1")
     w[w==Inf] <- 1
     exprs <- subColSummarizeAvg((pms-input.vecs$probeVec)*w, pns)
     W <- as.vector(rowsum(w, pns, reorder=FALSE))
@@ -54,7 +79,7 @@ frmaRobReg <- function(object, background, normalize, summarize, input.vecs, out
 
   if(summarize == "robust_weighted_average"){
     w <- 1/(input.vecs$probeVarWithin + input.vecs$probeVarBetween)
-    if(any(input.vecs$probeVarWithin==0) | any(input.vecs$probeVarBetween==0)) warning("Either probeVarWithin or probeVarBetween is 0 for some probes -- setting corresponding weights to 1")
+    if(any(input.vecs$probeVarWithin==0) | any(input.vecs$probeVarBetween==0)) message("Either probeVarWithin or probeVarBetween is 0 for some probes -- setting corresponding weights to 1")
     w[w==Inf] <- 1
     N <- 1:dim(pms)[1]
     S <- split(N, pns)
@@ -98,4 +123,5 @@ rwaFit2 <- function(x1, x2, x3, x4){
   pe.tmp[1] <- pe.tmp[1]-sum(pe.tmp)
   rcModelWPLM(y=x1, w=w.tmp, row.effects=pe.tmp, input.scale=x4)
 }
+
 
