@@ -1,5 +1,5 @@
 Package: frma
-Version: 1.3.5
+Version: 1.3.6
 Date: 2010-11-02
 Title: Frozen RMA and Barcode
 Description: Preprocessing and analysis for single microarrays and microarray batches.
