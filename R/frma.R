@@ -13,9 +13,14 @@ frma <- function(object, background="rma", normalize="quantile", summarize="robu
 
   if(summarize=="random_effect" & class(object)=="ExonFeatureSet") stop("Summarization method random_effect is not implemented for ExonFeatureSet objects.")
   
-  if(class(object)=="AffyBatch") cdfname <- cleancdfname(cdfName(object))
-  if(class(object)=="ExonFeatureSet") cdfname <- annotation(object)
-  platform <- gsub("cdf","",cdfname)
+  if(class(object)=="AffyBatch"){
+    cdfname <- cleancdfname(cdfName(object))
+    platform <- gsub("cdf","",cdfname)
+  }
+  if(class(object)=="ExonFeatureSet"){
+    cdfname <- annotation(object)
+    platform <- paste(cdfname, target, sep="")
+  }
 
   if(summarize == "median_polish") output <- frmaMedPol(object, background, normalize, target, input.vecs, verbose)
   if(summarize %in% c("average", "median", "weighted_average", "robust_weighted_average")) output <- frmaRobReg(object, background, normalize, summarize, target, input.vecs, output.param, verbose)
