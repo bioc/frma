@@ -21,40 +21,23 @@ frma <- function(object, background="rma", normalize="quantile", summarize="robu
   if(summarize %in% c("average", "median", "weighted_average", "robust_weighted_average")) output <- frmaRobReg(object, background, normalize, summarize, target, input.vecs, output.param, verbose)
   if(summarize == "random_effect") output <- frmaBatch(object, background, normalize, input.vecs, output.param, verbose)
 
-  if("stderr" %in% output.param) stderr <- output$stderr else stderr <- matrix(nrow=0, ncol=0)
-  if("weights" %in% output.param) w <- output$weights else w <- matrix(nrow=0, ncol=0)
-  if("residuals" %in% output.param) r <- output$residuals else r <- matrix(nrow=0, ncol=0)
-
-  if(class(object)=="AffyBatch"){
-    return(new("PLMset",
-        chip.coefs=output$exprs,
-        weights=list("PM.weights"=w, "MM.weights"=matrix(nrow=0, ncol=0)),
-        se.chip.coefs=stderr,
-        residuals=list("PM.resid"=r, "MM.resid"=matrix(nrow=0, ncol=0)),
-        cdfName = cdfname,
-        phenoData = phenoData(object),
-        annotation = annotation(object),
-        experimentData = experimentData(object),
-        nrow= object@nrow,
-        ncol= object@ncol,
-        narrays=length(object),
-        model.description = list()))
+  if(is.null(output.param)){
+    if(is.null(output$stderr)){
+      e <- new("ExpressionSet", assayData=assayDataNew(exprs=output$exprs), annotation=platform)
+    } else{
+      e <- new("ExpressionSet", assayData=assayDataNew(exprs=output$exprs, se.exprs=output$stderr), annotation=platform)
+    }
+  } else {
+    if(is.null(output$stderr)){
+      e <- new("frmaExpressionSet", assayData=assayDataNew(exprs=output$exprs), annotation=platform)
+    } else{
+      e <- new("frmaExpressionSet", assayData=assayDataNew(exprs=output$exprs, se.exprs=output$stderr), annotation=platform)
+    }
+    if("weights" %in% output.param) w <- output$weights else w <- matrix(nrow=0, ncol=0)
+    if("residuals" %in% output.param) r <- output$residuals else r <- matrix(nrow=0, ncol=0)
+    e@weights <- w
+    e@residuals <- r
   }
 
-  if(class(object)=="ExonFeatureSet"){
-    return(new("PLMset",
-        chip.coefs=output$exprs,
-        weights=list("PM.weights"=w, "MM.weights"=matrix(nrow=0, ncol=0)),
-        se.chip.coefs=stderr,
-        residuals=list("PM.resid"=r, "MM.resid"=matrix(nrow=0, ncol=0)),
-        cdfName = paste(cdfname, target, sep=""),
-        phenoData = phenoData(object),
-        annotation = annotation(object),
-        experimentData = experimentData(object),
-        nrow= geometry(object)[1],
-        ncol= geometry(object)[2],
-        narrays=ncol(object),
-        model.description = list()))
-  }
-    
+  return(e)
 }

@@ -9,7 +9,8 @@
   GNUSE(object, type=c("plot", "values", "stats", "density"), ...)
 }
 \arguments{
-  \item{object}{a PLMset produced by frma}
+  \item{object}{an ExpressionSet or frmaExpressionSet containing
+    standard errors produced by frma}
   \item{type}{the desired output}
   \item{...}{additional graphical parameters for types plot or density}
 }
@@ -24,7 +25,7 @@
   library(frma)
   library(frmaExampleData)
   data(AffyBatchExample)
-  object <- frma(AffyBatchExample, output.param=c("stderr"))
+  object <- frma(AffyBatchExample)
   GNUSE(object, type="stats")
 }
 \keyword{manip}

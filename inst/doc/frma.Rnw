@@ -99,10 +99,10 @@ object <- frma(AffyBatchExample, summarize="robust_weighted_average")
 @ 
 \end{enumerate}
 
-\subsubsection{Multiple Arrays: Batch Effect Adjusted}
-If you want the batch effect adjustment method described in the fRMA
-paper, the quickest way of reading in data and getting expression
-measures is the following:
+\subsubsection{Multiple Arrays: Random Effect Model}
+If you want to preprocess a batch of arrays using the model described
+in the fRMA paper, the quickest way of reading in data and getting
+expression measures is the following:
 \begin{enumerate}
 \item Download and install frma and the appropriate data file (i.e. hgu133afrmavecs, hgu133plus2frmavecs, etc.).
 \item Create a directory and move all the relevant
@@ -115,19 +115,18 @@ CEL} files (use ``File -> Change Dir'' menu item).
 <<echo=T,results=hide>>=
 ##library(frma)
 @ 
-\item Read in the data and preprocess using the ``batch'' option.
+\item Read in the data and preprocess using the ``random\_effect'' option.
 <<echo=T,results=hide>>=
 ##library(frmaExampleData)
 ##data(AffyBatchExample)
-##object <- frma(AffyBatchExample, summarize="batch")
+##object <- frma(AffyBatchExample, summarize="random_effect")
 @ 
 \end{enumerate}
 
-In each of the cases above, the final \Robject{object} will be a
-PLMset. To obtain a matrix of gene-level expression values, enter the
+In each of the cases above, the final \Robject{object} will be an ExpressionSet. To obtain a matrix of gene-level expression values, enter the
 following command:
 <<echo=T,results=hide>>=
-e <- coefs(object)
+e <- exprs(object)
 @ 
 
 Depending on the size of your dataset and on the memory available to
@@ -146,10 +145,10 @@ frma. A brief description of each of the methods follow:
 \begin{itemize}
   \item {\bf{average}:} compute the mean of the probes in each probeset
   \item {\bf{median}:} compute the median of the probes in each probeset
-  \item {\bf{median polish}:} subtract the probe-effect and then compute the median of the probes in each probeset
+  \item {\bf{median\_polish}:} subtract the probe-effect and then compute the median of the probes in each probeset
   \item {\bf{weighted average}:} compute a weighted average of the probes in each probeset with weights equal to the inverse of the sum of the precomputed within and between batch variance estimates.
-  \item {\bf{robust weighted average}:} compute a weighted average of the probes in each probeset with weights equal to the weights returned by an M-estimation procedure divided by the sum of the precomputed within and between batch variance estimates. 
-  \item {\bf{batch}:} the robust weighted average method adapted for a batch of new arrays.
+  \item {\bf{robust\_weighted\_ average}:} compute a weighted average of the probes in each probeset with weights equal to the weights returned by an M-estimation procedure divided by the sum of the precomputed within and between batch variance estimates. 
+  \item {\bf{random\_ effect}:} the robust weighted average method adapted for a batch of new arrays.
 \end{itemize}
 
 For a more in depth description of the final two methods, see
@@ -172,18 +171,18 @@ For further information on how these vectors are computed in the frmavecs packag
 
 \subsubsection{Output Parameters}
 While the default is to only return the gene-level expression
-estimates, the frma function can also return additional information
-about the estimates depending on the summarization method chosen. A
-description of the arguments that can be included in the output.param
-argument follows:
+estimates and if applicable their standard errors, the frma function
+can also return additional information about the estimates depending
+on the summarization method chosen. A description of the arguments
+that can be included in the output.param argument follows:
 \begin{itemize}
-  \item {\bf{stderr}:} the standard errors of the gene-level expression estimates.
   \item {\bf{weights}:} the weights from the M-estimation procedure.
   \item {\bf{residuals}:} the residuals from fitting the probe-level model.
 \end{itemize}
 
 Not all of these outputs are available for all of the summarization
-methods; however, all three are available for the default summarization procedure -- robust weighted average.
+methods; however, both are available for the default summarization
+procedure -- robust weighted average.
 
 \section{Creation of Gene Expression Barcodes}
 The barcode algorithm is designed to estimate which genes are

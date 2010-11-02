@@ -27,13 +27,14 @@ frma(object, background="rma", normalize="quantile",
     vectors is loaded if it has been installed. These packages are of
     the form: <platform>frmavecs.}
   \item{output.param}{a vector of output elements to return. By default
-    only the expression values are returned. Can contain any of
-    "residuals", "weights", or "stderr"}
+    only the expression values and standard errors (if applicable) are
+    returned. Additional options are: "residuals", "weights"}
   \item{verbose}{logical value. If TRUE then some messages are displayed
     while the function runs.}
 }
 \value{
-  The function returns a PLMset.
+  The function returns an ExpressionSet if output.param=NULL or an
+  frmaExpressionSet otherwise.
 }
 \author{Matthew N. McCall}
 \examples{

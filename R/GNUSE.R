@@ -1,14 +1,13 @@
 GNUSE <- function(object,type=c("plot","values","stats","density"),...){
   type <- match.arg(type)
-  if(length(se(object))==0) stop("Object does not contain standard errors.")
+  if(length(se.exprs(object))==0) stop("Object does not contain standard errors.")
 
-  cdfname <- cdfName(object)
-  platform <- gsub("cdf","",cdfname)
+  platform <- annotation(object)
   pkg <- paste(platform, "frmavecs", sep="")
   require(pkg, character.only=TRUE, quiet=TRUE) || stop(paste(pkg, "package must be installed first"))
   data(list=eval(pkg))
 
-  gnuses <- sweep(se(object),1,get(pkg)$medianSE,FUN='/')
+  gnuses <- sweep(se.exprs(object),1,get(pkg)$medianSE,FUN='/')
   if(any(is.na(gnuses))) message("Some GNUSE values are NA. This is often due to probesets with only 1 probe.")
       
   if (type == "values"){

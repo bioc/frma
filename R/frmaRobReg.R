@@ -35,7 +35,7 @@ frmaRobReg <- function(object, background, normalize, summarize, target, input.v
   
   if(is.null(input.vecs$normVec) | is.null(input.vecs$probeVec) | is.null(input.vecs$probeVarWithin) | is.null(input.vecs$probeVarBetween) | (summarize=="robust_weighted_average" & is.null(input.vecs$probesetSD))){
     if(class(object)=="AffyBatch") pkg <- paste(platform, "frmavecs", sep="")
-    if(class(object)=="ExonFeatureSet") pkg <- paste(platform, "frmavecs", target, sep="")
+    if(class(object)=="ExonFeatureSet") pkg <- paste(platform, target, "frmavecs", sep="")
     require(pkg, character.only=TRUE, quiet=TRUE) || stop(paste(pkg, "package must be installed first"))
     data(list=eval(pkg))
 
@@ -96,11 +96,9 @@ frmaRobReg <- function(object, background, normalize, summarize, target, input.v
       rownames(weights) <- pns
       colnames(weights) <- sampleNames(object)
     } else weights <- NULL
-    if("stderr" %in% output.param){
-      stderr <- matrix(unlist(lapply(fit, function(x) x$StdErrors)), ncol=ncol(pms), byrow=TRUE)
-      rownames(stderr) <- names(fit)
-      colnames(stderr) <- sampleNames(object)
-    } else stderr <- NULL
+    stderr <- matrix(unlist(lapply(fit, function(x) x$StdErrors)), ncol=ncol(pms), byrow=TRUE)
+    rownames(stderr) <- names(fit)
+    colnames(stderr) <- sampleNames(object)
   }
 
   if("residuals" %in% output.param){

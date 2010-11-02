@@ -46,10 +46,8 @@ frmaBatch <- function(object, background, normalize, input.vecs, output.param, v
     colnames(weights) <- sampleNames(object)
   } else weights <- NULL
 
-  if("stderr" %in% output.param){
-    stderr <- unlist(lapply(fit, function(x) x$se))
-    names(stderr) <- names(fit)
-  } else stderr <- NULL
+  stderr <- unlist(lapply(fit, function(x) x$se))
+  names(stderr) <- names(fit)
 
   if("residuals" %in% output.param){
     residuals <- apply(exprs,2,function(x) rep(x, table(pns)))

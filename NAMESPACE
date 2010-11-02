@@ -1,20 +1,22 @@
 importClassesFrom(Biobase, AnnotatedDataFrame, AssayData, eSet,
                   ExpressionSet, MIAME, Versioned, VersionedBiobase,
                   Versions)
-importClassesFrom(affy)
-importClassesFrom(affyPLM, PLMset)
 importClassesFrom(methods, character, matrix)
 importMethodsFrom(methods, initialize)
 importMethodsFrom(Biobase, annotatedDataFrameFrom, exprs, annotation, sampleNames)
 importMethodsFrom(affy, cdfName, pm, "pm<-", probeNames)
+importMethodsFrom(oligo, backgroundCorrect)
+importMethodsFrom(oligoClasses, db)
+importMethodsFrom(DBI, dbGetQuery)
 
 importFrom(Biobase, assayDataElement, assayDataElementReplace, assayDataNew)
 importFrom(MASS, rlm)
-importFrom(affy, bg.correct.rma, cleancdfname, ReadAffy)
+importFrom(affy, bg.correct.rma, cleancdfname, ReadAffy, plotDensity)
 importFrom(preprocessCore, normalize.quantiles.use.target, rcModelWPLM,
                               subColSummarizeAvg, subColSummarizeMedian)
 importFrom(utils, data)
 importFrom(methods, is, callNextMethod, new)
 
 export(frma, barcode, GNUSE)
-
+exportClasses(frmaExpressionSet)
+exportMethods(initialize, se.exprs, weights, residuals, as.ExpressionSet)
