@@ -19,7 +19,7 @@ frma(object, background="rma", normalize="quantile",
     "quantile".}  
   \item{summarize}{type of summarization to perform: one of
     "median\_polish", "average", "median", "weighted\_average",
-    "robust\_weighted\_average", "batch".}
+    "robust\_weighted\_average", "random\_effect".}
   \item{target}{summarization level for exon arrays. Must be one of:
     probeset, core, full, extended.}
   \item{input.vecs}{a list of vectors to be used in preprocessing. If
