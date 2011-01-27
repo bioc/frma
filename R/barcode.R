@@ -12,11 +12,15 @@ barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=6.5, output
   }
 
   if(class(object) %in% c("ExpressionSet", "frmaExpressionSet")){
-    if(annotation(object) %in% c("hgu133a", "hgu133plus2", "mouse4302")){
-      if(cleancdfname(annotation(object)) == "hgu133acdf") platform <- "GPL96"
-      if(cleancdfname(annotation(object)) == "hgu133plus2cdf") platform <- "GPL570"
-      if(cleancdfname(annotation(object)) == "mouse4302cdf") platform <- "GPL1261"
-    } else stop("Microarray platform given by object annotation not recognized -- please supply platform type.")
+    if(is.null(platform)){
+      if(annotation(object) %in% c("hgu133a", "hgu133plus2", "mouse4302")){
+        if(cleancdfname(annotation(object)) == "hgu133acdf") platform <- "GPL96"
+        if(cleancdfname(annotation(object)) == "hgu133plus2cdf") platform <- "GPL570"
+        if(cleancdfname(annotation(object)) == "mouse4302cdf") platform <- "GPL1261"
+      } else stop("Microarray platform given by object annotation not recognized -- please supply platform type.")
+    } else {
+      if(!platform %in% c("GPL96", "GPL570", "GPL1261")) stop("Platform must be one of: GPL96, GPL570, GPL1261")
+    }
     object <- as.matrix(exprs(object))
   }
 
@@ -28,11 +32,12 @@ barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=6.5, output
   if(platform == "GPL1261" & nrow(object)!=45037) stop("Object does not have the correct dimensions for platform GPL1261.")
   
   if(is.null(mu) | is.null(tau)){
-    if(platform=="GPL96") pkg <- "hgu133abarcodevecs"
-    if(platform=="GPL570") pkg <- "hgu133plus2barcodevecs"
-    if(platform=="GPL1261") pkg <- "mouse4302barcodevecs"
+    if(platform=="GPL96") pkg <- "hgu133afrmavecs"
+    if(platform=="GPL570") pkg <- "hgu133plus2frmavecs"
+    if(platform=="GPL1261") pkg <- "mouse4302frmavecs"
     require(pkg, character.only=TRUE, quiet=TRUE) || stop(paste(pkg, "package must be installed first"))
-    data(list=paste("bcparams-", platform, sep=""))
+    data(list=eval(gsub("frma", "barcode", pkg)))
+    bcparams <- get(gsub("frma", "barcode", pkg))
     if(is.null(mu)) mu <- bcparams[,2]
     if(is.null(tau)) tau <- sqrt(bcparams[,3])
   }
