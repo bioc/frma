@@ -46,9 +46,6 @@ frmaBatch <- function(object, background, normalize, input.vecs, output.param, v
     colnames(weights) <- sampleNames(object)
   } else weights <- NULL
 
-  stderr <- unlist(lapply(fit, function(x) x$se))
-  names(stderr) <- names(fit)
-
   if("residuals" %in% output.param){
     residuals <- apply(exprs,2,function(x) rep(x, table(pns)))
     residuals <- (pms-input.vecs$probeVec) - residuals
@@ -57,8 +54,9 @@ frmaBatch <- function(object, background, normalize, input.vecs, output.param, v
   } else residuals <- NULL
   
   colnames(exprs) <- sampleNames(object)
+  rownames(exprs) <- unique(pns)
   
-  return(list(exprs=exprs, stderr=stderr, weights=weights, residuals=residuals))
+  return(list(exprs=exprs, stderr=NULL, weights=weights, residuals=residuals))
 }
 
 batchFit <- function(x1, x2, x3, x4){
@@ -83,6 +81,5 @@ batchFit <- function(x1, x2, x3, x4){
   offset.u <- mean(u)
   exprs <- b + offset.u
   w <- fit.batch$w
-  se <- fit.batch$s
-  return(list(exprs=exprs, w=w, se=se))
+  return(list(exprs=exprs, w=w))
 }

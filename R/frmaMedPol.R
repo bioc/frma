@@ -52,6 +52,8 @@ frmaMedPol <- function(object, background, normalize, target, input.vecs, verbos
   exprs <- subColSummarizeMedian(pms, pns)
 
   colnames(exprs) <- sampleNames(object)
+  rownames(exprs) <- unique(pns)
+  
   return(list(exprs=exprs, stderr=NULL, weights=NULL, residuals=NULL))
 }
 
