@@ -1,13 +1,16 @@
-GNUSE <- function(object,type=c("plot","values","stats","density"),...){
+GNUSE <- function(object,medianSE=NULL,type=c("plot","values","stats","density"),...){
   type <- match.arg(type)
   if(length(se.exprs(object))==0) stop("Object does not contain standard errors.")
 
-  platform <- annotation(object)
-  pkg <- paste(platform, "frmavecs", sep="")
-  require(pkg, character.only=TRUE, quiet=TRUE) || stop(paste(pkg, "package must be installed first"))
-  data(list=eval(pkg))
-
-  gnuses <- sweep(se.exprs(object),1,get(pkg)$medianSE,FUN='/')
+  if(is.null(medianSE)){
+    platform <- annotation(object)
+    pkg <- paste(platform, "frmavecs", sep="")
+    require(pkg, character.only=TRUE, quiet=TRUE) || stop(paste(pkg, "package must be installed first"))
+    data(list=eval(pkg))
+    medianSE <- get(pkg)$medianSE
+  }
+  
+  gnuses <- sweep(se.exprs(object),1,medianSE,FUN='/')
   if(any(is.na(gnuses))) message("Some GNUSE values are NA. This is often due to probesets with only 1 probe.")
       
   if (type == "values"){

@@ -6,11 +6,13 @@
   of microarray quality).
 }
 \usage{
-  GNUSE(object, type=c("plot", "values", "stats", "density"), ...)
+  GNUSE(object, medianSE=NULL, type=c("plot", "values", "stats", "density"), ...)
 }
 \arguments{
   \item{object}{an ExpressionSet or frmaExpressionSet containing
     standard errors produced by frma}
+  \item{medianSE}{median standard errors to be used. If NULL, these are
+    obtained from the correct frmavecs package.}
   \item{type}{the desired output}
   \item{...}{additional graphical parameters for types plot or density}
 }
