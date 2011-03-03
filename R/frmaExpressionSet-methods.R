@@ -24,6 +24,9 @@ setMethod("weights", signature(object="frmaExpressionSet"),
 setMethod("residuals", signature(object="frmaExpressionSet"),
           function(object) object@residuals)
 
+setMethod("randomeffects", signature(object="frmaExpressionSet"),
+          function(object) object@randomeffects)
+
 setMethod("as.ExpressionSet", signature(object="frmaExpressionSet"),
           function(object){
             new("ExpressionSet", assayData=assayDataNew(exprs=exprs(object), se.exprs=se.exprs(object)), annotation=annotation(object))

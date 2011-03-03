@@ -40,8 +40,10 @@ frma <- function(object, background="rma", normalize="quantile", summarize="robu
     }
     if("weights" %in% output.param) w <- output$weights else w <- matrix(nrow=0, ncol=0)
     if("residuals" %in% output.param) r <- output$residuals else r <- matrix(nrow=0, ncol=0)
+    if("random_effects" %in% output.param) g <- output$gammas else g <- matrix(nrow=0, ncol=0)
     e@weights <- w
     e@residuals <- r
+    e@randomeffects <- g
   }
 
   return(e)

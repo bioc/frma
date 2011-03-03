@@ -28,7 +28,7 @@ frma(object, background="rma", normalize="quantile",
     the form: <platform>frmavecs.}
   \item{output.param}{a vector of output elements to return. By default
     only the expression values and standard errors (if applicable) are
-    returned. Additional options are: "residuals", "weights"}
+    returned. Additional options are: "residuals", "weights", "random_effects"}
   \item{verbose}{logical value. If TRUE then some messages are displayed
     while the function runs.}
 }

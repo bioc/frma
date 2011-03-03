@@ -1,1 +1,1 @@
-setClass("frmaExpressionSet", representation(weights="matrix", residuals="matrix"), prototype=list(weights=matrix(), residuals=matrix()), contains="ExpressionSet")
+setClass("frmaExpressionSet", representation(weights="matrix", residuals="matrix", randomeffects="matrix"), prototype=list(weights=matrix(), residuals=matrix(), randomeffects=matrix()), contains="ExpressionSet")

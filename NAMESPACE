@@ -19,4 +19,4 @@ importFrom(methods, is, callNextMethod, new)
 
 export(frma, barcode, GNUSE)
 exportClasses(frmaExpressionSet)
-exportMethods(initialize, se.exprs, weights, residuals, as.ExpressionSet)
+exportMethods(initialize, se.exprs, weights, residuals, randomeffects, as.ExpressionSet)

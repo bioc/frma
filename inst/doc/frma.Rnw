@@ -178,11 +178,11 @@ that can be included in the output.param argument follows:
 \begin{itemize}
   \item {\bf{weights}:} the weights from the M-estimation procedure.
   \item {\bf{residuals}:} the residuals from fitting the probe-level model.
+  \item {\bf{randomeffects}:} estimated random effects from fitting the probe-level model with random effect summarization.
 \end{itemize}
 
 Not all of these outputs are available for all of the summarization
-methods; however, both are available for the default summarization
-procedure -- robust weighted average.
+methods.
 
 \section{Creation of Gene Expression Barcodes}
 The barcode algorithm is designed to estimate which genes are

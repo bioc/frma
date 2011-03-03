@@ -110,7 +110,7 @@ frmaRobReg <- function(object, background, normalize, summarize, target, input.v
   
   colnames(exprs) <- sampleNames(object)
   
-  return(list(exprs=exprs, stderr=stderr, weights=weights, residuals=residuals))
+  return(list(exprs=exprs, stderr=stderr, weights=weights, residuals=residuals, gammas=NULL))
 }
 
 rwaFit2 <- function(x1, x2, x3, x4){

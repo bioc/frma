@@ -54,6 +54,6 @@ frmaMedPol <- function(object, background, normalize, target, input.vecs, verbos
   colnames(exprs) <- sampleNames(object)
   rownames(exprs) <- unique(pns)
   
-  return(list(exprs=exprs, stderr=NULL, weights=NULL, residuals=NULL))
+  return(list(exprs=exprs, stderr=NULL, weights=NULL, residuals=NULL, gammas=NULL))
 }
 

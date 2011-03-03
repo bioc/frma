@@ -9,10 +9,12 @@
 \alias{se.exprs,ExpressionSet-method}
 \alias{weights,frmaExpressionSet-method}
 \alias{residuals,frmaExpressionSet-method}
+\alias{randomeffects,frmaExpressionSet-method}
 \alias{as.ExpressionSet,frmaExpressionSet-method}
 \alias{se.exprs}
 \alias{weights}
 \alias{residuals}
+\alias{randomeffects}
 \alias{as.ExpressionSet}
 \title{
   Class to Contain and Describe High-Throughput Expression Level Assays
@@ -33,13 +35,15 @@
     annotation = character(0),
     exprs = new("matrix"),
     weights = new("matrix"),
-    residuals = new("matrix")
+    residuals = new("matrix"),
+    randomeffects = new("matrix")
   }  
 
   This creates a \code{frmaExpressionSet} with \code{assayData}
   implicitly created to contain \code{exprs}. The only required named
-  argument is \code{exprs}. Two optional named matrices, \code{weights}
-  and \code{residuals}, can be added to the object.
+  argument is \code{exprs}. Three optional named matrices,
+  \code{weights}, \code{residuals}, and \code{randomeffects} can be
+  added to the object.
 
   \code{new("frmaExpressionSet",
     assayData = assayDataNew(exprs=new("matrix"),se.exprs=new("matrix")),  
@@ -48,19 +52,23 @@
     experimentData = new("MIAME"),
     annotation = character(0),
     weights = new("matrix"),
-    residuals = new("matrix")
+    residuals = new("matrix"),
+    randomeffects = new("matrix")
   }
 
-  This creates a \code{frmaExpressionSet} with \code{assayData}
-  provided explicitly. In this form, the only required named argument
-  is \code{assayData}. Two optional named matrices, \code{weights}
-  and \code{residuals}, can be added to the object.
-}
+  This creates a \code{frmaExpressionSet} with \code{assayData} provided
+  explicitly. In this form, the only required named argument is
+  \code{assayData}. Three optional named matrices, \code{weights},
+  \code{residuals}, and \code{randomeffects} can be added to the object.
+  }
     
 \section{Slots}{
   \describe{
     \item{\code{weights}:}{weights used in the summarization step}
-    \item{\code{residuals}:}{residuals from fitting the probe-level model}
+    \item{\code{residuals}:}{residuals from fitting the probe-level
+      model}
+    \item{\code{randomeffects}:}{random effect estimates from fitting
+  the probe-level model using random effect summarization}
   }
   Inherited from \code{ExpressionSet}:
   \describe{
@@ -86,6 +94,8 @@
       \code{weights}}
     \item{\code{residuals(frmaExpressionSet)}}{Access elements named
       \code{residuals}}
+    \item{\code{randomeffects(frmaExpressionSet)}}{Access elements named
+      \code{randomeffects}}
   }
 
   For derived methods (see \code{ExpressionSet}).
