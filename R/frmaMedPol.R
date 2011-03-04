@@ -2,7 +2,10 @@ frmaMedPol <- function(object, background, normalize, target, input.vecs, verbos
 
   if(class(object)=="AffyBatch") cdfname <- cleancdfname(cdfName(object))
   if(class(object)=="ExonFeatureSet") cdfname <- annotation(object)
-  platform <- gsub("cdf","",cdfname)
+  tmp <- gsub("cdf","",cdfname)
+  platform <- gsub("..entrezg", "", tmp)
+  if(class(object)=="AffyBatch") vecdataname <- paste(tmp, "frmavecs", sep="")
+  if(class(object)=="ExonFeatureSet") vecdataname <- paste(tmp, target, "frmavecs", sep="")
 
   if(background == "rma"){
     if(verbose) message("Background Correcting ...\n")
@@ -34,12 +37,13 @@ frmaMedPol <- function(object, background, normalize, target, input.vecs, verbos
   }
   
   if(is.null(input.vecs$normVec) | is.null(input.vecs$probeVec)){
-    pkg <- paste(platform, "frmavecs", sep="")
+    if(class(object)=="AffyBatch") pkg <- paste(platform, "frmavecs", sep="")
+    if(class(object)=="ExonFeatureSet") pkg <- paste(platform, target, "frmavecs", sep="")
     require(pkg, character.only=TRUE, quiet=TRUE) || stop(paste(pkg, "package must be installed first"))
-    data(list=eval(pkg))
+    data(list=eval(vecdataname))
 
-    if(is.null(input.vecs$normVec)) input.vecs$normVec <- get(pkg)$normVec
-    if(is.null(input.vecs$probeVec)) input.vecs$probeVec <- get(pkg)$probeVec
+    if(is.null(input.vecs$normVec)) input.vecs$normVec <- get(vecdataname)$normVec
+    if(is.null(input.vecs$probeVec)) input.vecs$probeVec <- get(vecdataname)$probeVec
   }
   
   if(normalize == "quantile"){

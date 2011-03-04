@@ -2,7 +2,10 @@ frmaRobReg <- function(object, background, normalize, summarize, target, input.v
 
   if(class(object)=="AffyBatch") cdfname <- cleancdfname(cdfName(object))
   if(class(object)=="ExonFeatureSet") cdfname <- annotation(object)
-  platform <- gsub("cdf","",cdfname)
+  tmp <- gsub("cdf","",cdfname)
+  platform <- gsub("..entrezg", "", tmp)
+  if(class(object)=="AffyBatch") vecdataname <- paste(tmp, "frmavecs", sep="")
+  if(class(object)=="ExonFeatureSet") vecdataname <- paste(tmp, target, "frmavecs", sep="")
   
   if(background == "rma"){
     if(verbose) message("Background Correcting ...\n")
@@ -37,13 +40,13 @@ frmaRobReg <- function(object, background, normalize, summarize, target, input.v
     if(class(object)=="AffyBatch") pkg <- paste(platform, "frmavecs", sep="")
     if(class(object)=="ExonFeatureSet") pkg <- paste(platform, target, "frmavecs", sep="")
     require(pkg, character.only=TRUE, quiet=TRUE) || stop(paste(pkg, "package must be installed first"))
-    data(list=eval(pkg))
+    data(list=eval(vecdataname))
 
-    if(is.null(input.vecs$normVec)) input.vecs$normVec <- get(pkg)$normVec
-    if(is.null(input.vecs$probeVec)) input.vecs$probeVec <- get(pkg)$probeVec
-    if(is.null(input.vecs$probeVarWithin)) input.vecs$probeVarWithin <- get(pkg)$probeVarWithin
-    if(is.null(input.vecs$probeVarBetween)) input.vecs$probeVarBetween <- get(pkg)$probeVarBetween
-    if(is.null(input.vecs$probesetSD) & summarize=="robust_weighted_average") input.vecs$probesetSD <- get(pkg)$probesetSD
+    if(is.null(input.vecs$normVec)) input.vecs$normVec <- get(vecdataname)$normVec
+    if(is.null(input.vecs$probeVec)) input.vecs$probeVec <- get(vecdataname)$probeVec
+    if(is.null(input.vecs$probeVarWithin)) input.vecs$probeVarWithin <- get(vecdataname)$probeVarWithin
+    if(is.null(input.vecs$probeVarBetween)) input.vecs$probeVarBetween <- get(vecdataname)$probeVarBetween
+    if(is.null(input.vecs$probesetSD) & summarize=="robust_weighted_average") input.vecs$probesetSD <- get(vecdataname)$probesetSD
   }
 
   if(normalize == "quantile"){
