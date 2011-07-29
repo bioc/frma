@@ -11,11 +11,20 @@
 \alias{residuals,frmaExpressionSet-method}
 \alias{randomeffects,frmaExpressionSet-method}
 \alias{as.ExpressionSet,frmaExpressionSet-method}
-\alias{se.exprs}
-\alias{weights}
-\alias{residuals}
+\alias{se.exprs,frmaExpressionSet-method}
+\alias{se.exprs<-}
+\alias{se.exprs<-,frmaExpressionSet-method}
+\alias{se.exprs<-,ExpressionSet-method}
+\alias{weights,frmaExpressionSet-method}
+\alias{weights<-}
+\alias{weights<-,frmaExpressionSet-method}
+\alias{residuals,frmaExpressionSet-method}
+\alias{residuals<-}
+\alias{residuals<-,frmaExpressionSet-method}
 \alias{randomeffects}
-\alias{as.ExpressionSet}
+\alias{randomeffects,frmaExpressionSet-method}
+\alias{randomeffects<-}
+\alias{randomeffects<-,frmaExpressionSet-method}
 \title{
   Class to Contain and Describe High-Throughput Expression Level Assays
   preprocessed with fRMA}
@@ -29,31 +38,34 @@
 \section{Creating Objects}{
 
   \code{new("frmaExpressionSet",
+    exprs = new("matrix"),
+    se.exprs = new("matrix"),
+    weights=new("matrix"),
+    residuals=new("matrix"),
+    randomeffects=new("matrix"),
     phenoData = new("AnnotatedDataFrame"),
     featureData = new("AnnotatedDataFrame"),
     experimentData = new("MIAME"),
-    annotation = character(0),
-    exprs = new("matrix"),
-    weights = new("matrix"),
-    residuals = new("matrix"),
-    randomeffects = new("matrix")
+    annotation = new("character"),
+    ...)
   }  
 
   This creates a \code{frmaExpressionSet} with \code{assayData}
-  implicitly created to contain \code{exprs}. The only required named
-  argument is \code{exprs}. Three optional named matrices,
-  \code{weights}, \code{residuals}, and \code{randomeffects} can be
-  added to the object.
+  implicitly created to contain \code{exprs} and \code{se.exprs}. The
+  only required named arguments is \code{exprs}. Three optional named
+  matrices, \code{weights}, \code{residuals}, and \code{randomeffects}
+  can be added to the object.
 
   \code{new("frmaExpressionSet",
     assayData = assayDataNew(exprs=new("matrix"),se.exprs=new("matrix")),  
+    weights=new("matrix"),
+    residuals=new("matrix"),
+    randomeffects=new("matrix"),
     phenoData = new("AnnotatedDataFrame"),
     featureData = new("AnnotatedDataFrame"),
     experimentData = new("MIAME"),
-    annotation = character(0),
-    weights = new("matrix"),
-    residuals = new("matrix"),
-    randomeffects = new("matrix")
+    annotation = new("character"),
+    ...)
   }
 
   This creates a \code{frmaExpressionSet} with \code{assayData} provided
@@ -64,6 +76,7 @@
     
 \section{Slots}{
   \describe{
+    \item{\code{se.exprs}:}{standard errors for the expression estimates}
     \item{\code{weights}:}{weights used in the summarization step}
     \item{\code{residuals}:}{residuals from fitting the probe-level
       model}

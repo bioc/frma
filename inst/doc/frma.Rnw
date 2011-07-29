@@ -1,7 +1,7 @@
 % automatic manuscript creation for frma
 % -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
 %\VignetteIndexEntry{frma: Preprocessing for single arrays and array batches}
-%\VignetteDepends{frma, hgu133afrmavecs, hgu133abarcodevecs, frmaExampleData}
+%\VignetteDepends{frma, hgu133afrmavecs, frmaExampleData}
 %\VignettePackage{frma}
 \documentclass[12pt]{article}
 \usepackage{hyperref}
@@ -221,7 +221,7 @@ then run \Rfunction{barcode} on the resulting object.
 \subsubsection{Example}
 \begin{enumerate}
 \item Download and install the frma package and the appropriate data
-packages (i.e. hgu133afrmavecs and hgu133abarcodevecs).
+package(s) (i.e. hgu133afrmavecs).
 \item Create a directory and move all the relevant
 {\it CEL} files to that directory.
 \item If using linux/unix, start R in that directory.

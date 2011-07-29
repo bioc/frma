@@ -1,5 +1,5 @@
-setGeneric("se.exprs", function(object) standardGeneric("se.exprs"))
-setGeneric("weights", function(object) standardGeneric("weights"))
-setGeneric("residuals", function(object) standardGeneric("residuals"))
 setGeneric("randomeffects", function(object) standardGeneric("randomeffects"))
 setGeneric("as.ExpressionSet", function(object) standardGeneric("as.ExpressionSet"))
+setGeneric("weights<-", function(object, value) standardGeneric("weights<-"))
+setGeneric("residuals<-", function(object, value) standardGeneric("residuals<-"))
+setGeneric("randomeffects<-", function(object, value) standardGeneric("randomeffects<-"))
