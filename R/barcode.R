@@ -24,24 +24,35 @@ barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=6.5, output
     object <- as.matrix(exprs(object))
   }
 
+  if(is.null(rownames(object))) stop("Object must have rownames.")
+  
   i.remove <- grep("AFFX", rownames(object))
   if(length(i.remove)>0) object <- as.matrix(object[-i.remove,])
 
-  if(platform == "GPL96" & nrow(object)!=22215) stop("Object does not have the correct dimensions for platform GPL96.")
-  if(platform == "GPL570" & nrow(object)!=54613) stop("Object does not have the correct dimensions for platform GPL570.")
-  if(platform == "GPL1261" & nrow(object)!=45037) stop("Object does not have the correct dimensions for platform GPL1261.")
-  
   if(is.null(mu) | is.null(tau)){
     if(platform=="GPL96") pkg <- "hgu133afrmavecs"
     if(platform=="GPL570") pkg <- "hgu133plus2frmavecs"
     if(platform=="GPL1261") pkg <- "mouse4302frmavecs"
     require(pkg, character.only=TRUE, quiet=TRUE) || stop(paste(pkg, "package must be installed first"))
-    data(list=eval(gsub("frma", "barcode", pkg)))
+    data(list=gsub("frma", "barcode", pkg))
     bcparams <- get(gsub("frma", "barcode", pkg))
-    if(is.null(mu)) mu <- bcparams$mu
-    if(is.null(tau)) tau <- bcparams$tau
+    if(is.null(mu)){
+      mu <- bcparams$mu
+      names(mu) <- names(bcparams$entropy)
+    }
+    if(is.null(tau)){
+      tau <- bcparams$tau
+      names(tau) <- names(bcparams$entropy)
+    }
   }
+
+  if(platform == "GPL96" & nrow(object)!=22215) stop("Object does not have the correct dimensions for platform GPL96.")
+  if(platform == "GPL570" & nrow(object)!=54613) stop("Object does not have the correct dimensions for platform GPL570.")
+  if(platform == "GPL1261" & nrow(object)!=45037) stop("Object does not have the correct dimensions for platform GPL1261.")
   
+  if(!identical(rownames(object),names(mu))) stop("Object has different rownames than mean vector, mu.")
+  if(!identical(rownames(object),names(tau))) stop("Object has different rownames than sd vector, tau.")
+    
   e <- object
   num <- round(nrow(e)/10)
   
@@ -67,7 +78,8 @@ barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=6.5, output
   }
 
   if(output == "z-score"){
-    z <- sweep(sweep(e, 1, mu), 1, tau, FUN="/")
+    ##z <- sweep(sweep(e, 1, mu), 1, tau, FUN="/")
+    z <- (e-mu)/tau
     colnames(z) <- colnames(e)
     rownames(z) <- rownames(e)
     return(z)
