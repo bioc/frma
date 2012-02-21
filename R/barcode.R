@@ -8,7 +8,6 @@ barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=6.5, output
   
   if(is.matrix(object)){
     if(is.null(platform)) stop("If object is of class matrix or vector, platform cannot be NULL.")
-    if(!platform %in% c("GPL96", "GPL570", "GPL1261")) stop("Platform must be one of: GPL96, GPL570, GPL1261")
   }
 
   if(class(object) %in% c("ExpressionSet", "frmaExpressionSet")){
@@ -30,6 +29,7 @@ barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=6.5, output
   if(length(i.remove)>0) object <- as.matrix(object[-i.remove,])
 
   if(is.null(mu) | is.null(tau)){
+    if(!platform %in% c("GPL96", "GPL570", "GPL1261")) stop("mu and tau must be non-NULL unless platform is one of: GPL96, GPL570, GPL1261")
     if(platform=="GPL96") pkg <- "hgu133afrmavecs"
     if(platform=="GPL570") pkg <- "hgu133plus2frmavecs"
     if(platform=="GPL1261") pkg <- "mouse4302frmavecs"
@@ -54,7 +54,6 @@ barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=6.5, output
   if(!identical(rownames(object),names(tau))) stop("Object has different rownames than sd vector, tau.")
     
   e <- object
-  num <- round(nrow(e)/10)
   
   if(output %in% c("p-value", "lod", "binary")){
     pval <- pnorm(e, mean=mu, sd=tau, lower.tail=FALSE)
