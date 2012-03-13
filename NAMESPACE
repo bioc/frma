@@ -16,7 +16,7 @@ importFrom(preprocessCore, normalize.quantiles.use.target, rcModelWPLM,
                               subColSummarizeAvg, subColSummarizeMedian)
 importFrom(utils, data)
 importFrom(methods, is, callNextMethod, new, setAs, as)
-importFrom(stats, weights, residuals)
+importFrom(BiocGenerics, weights, residuals)
 
 export(frma, barcode, GNUSE)
 exportClasses(frmaExpressionSet)
