@@ -1,19 +1,24 @@
 frmaMedPol <- function(object, background, normalize, target, input.vecs, verbose){
 
-  if(class(object)=="AffyBatch") cdfname <- cleancdfname(cdfName(object))
-  if(class(object)=="ExonFeatureSet") cdfname <- annotation(object)
-  tmp <- gsub("cdf","",cdfname)
-  platform <- gsub("..entrezg", "", tmp)
-  if(class(object)=="AffyBatch") vecdataname <- paste(tmp, "frmavecs", sep="")
-  if(class(object)=="ExonFeatureSet") vecdataname <- paste(tmp, target, "frmavecs", sep="")
+  if(class(object)=="AffyBatch"){
+    cdfname <- cleancdfname(cdfName(object))
+    tmp <- gsub("cdf","",cdfname)
+    platform <- gsub("..entrezg", "", tmp)
+    vecdataname <- paste(tmp, "frmavecs", sep="")
+  }
+  if(class(object)%in%c("ExonFeatureSet","GeneFeatureSet")){
+    cdfname <- annotation(object)
+    platform <- gsub("pd.","",cdfname,fixed=TRUE)
+    vecdataname <- paste(platform, "frmavecs", sep="")
+  }
 
   if(background == "rma"){
     if(verbose) message("Background Correcting ...\n")
     if(class(object)=="AffyBatch") object <- bg.correct.rma(object)
-    if(class(object)=="ExonFeatureSet") object <- backgroundCorrect(object, verbose=FALSE)
+    if(class(object)%in%c("ExonFeatureSet","GeneFeatureSet")) object <- backgroundCorrect(object, verbose=FALSE)
   }
 
-  if(class(object)=="ExonFeatureSet"){
+  if(class(object)%in%c("ExonFeatureSet","GeneFeatureSet")){
     if(target=="probeset"){
       featureInfo <- getFidProbeset(object)
     }
@@ -37,8 +42,7 @@ frmaMedPol <- function(object, background, normalize, target, input.vecs, verbos
   }
   
   if(is.null(input.vecs$normVec) | is.null(input.vecs$probeVec)){
-    if(class(object)=="AffyBatch") pkg <- paste(platform, "frmavecs", sep="")
-    if(class(object)=="ExonFeatureSet") pkg <- paste(platform, target, "frmavecs", sep="")
+    pkg <- paste(platform, "frmavecs", sep="")
     require(pkg, character.only=TRUE, quiet=TRUE) || stop(paste(pkg, "package must be installed first"))
     data(list=eval(vecdataname))
 

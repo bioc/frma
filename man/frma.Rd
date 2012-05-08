@@ -2,17 +2,17 @@
 \alias{frma}
 \title{Frozen Robust Multi-Array Analysis}
 \description{
-  This function preprocesses an AffyBatch or ExonFeatureSet object using the fRMA method.
+  This function preprocesses an AffyBatch, ExonFeatureSet, or GeneFeatureSet object using the fRMA method.
 }
 \usage{
 frma(object, background="rma", normalize="quantile",
-    summarize="robust_weighted_average", target="core",
+    summarize="robust_weighted_average", target="probeset",
     input.vecs=list(normVec=NULL, probeVec=NULL, probeVarBetween=NULL,
     probeVarWithin=NULL, probesetSD=NULL), output.param=NULL,
     verbose=FALSE) 
 }
 \arguments{
-  \item{object}{an AffyBatch}
+  \item{object}{an AffyBatch, ExonFeatureSet, or GeneFeatureSet}
   \item{background}{type of background correction to perform: either
     "none" or "rma".}
   \item{normalize}{type of normalization to perform: either "none" or
@@ -20,8 +20,8 @@ frma(object, background="rma", normalize="quantile",
   \item{summarize}{type of summarization to perform: one of
     "median\_polish", "average", "median", "weighted\_average",
     "robust\_weighted\_average", "random\_effect".}
-  \item{target}{summarization level for exon arrays. Must be one of:
-    probeset, core, full, extended.}
+  \item{target}{summarization level for exon and gene arrays. Must be one of:
+    probeset, core, full (exon only), extended (exon only).}
   \item{input.vecs}{a list of vectors to be used in preprocessing. If
     necessary elements are NULL, the correct package with the default
     vectors is loaded if it has been installed. These packages are of

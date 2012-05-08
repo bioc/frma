@@ -1,25 +1,27 @@
-frma <- function(object, background="rma", normalize="quantile", summarize="robust_weighted_average", target="core", input.vecs=list(normVec=NULL, probeVec=NULL, probeVarBetween=NULL, probeVarWithin=NULL, probesetSD=NULL), output.param=NULL, verbose=FALSE){
+frma <- function(object, background="rma", normalize="quantile", summarize="robust_weighted_average", target="probeset", input.vecs=list(normVec=NULL, probeVec=NULL, probeVarBetween=NULL, probeVarWithin=NULL, probesetSD=NULL), output.param=NULL, verbose=FALSE){
 
-  if(!class(object) %in% c("AffyBatch", "ExonFeatureSet")) stop("object must be of class AffyBatch or ExonFeatureSet.")
+  if(!class(object) %in% c("AffyBatch", "ExonFeatureSet", "GeneFeatureSet")) stop("object must be of class AffyBatch, ExonFeatureSet, or GeneFeatureSet.")
 
   if(class(object)=="ExonFeatureSet") target <- match.arg(target, c("core", "full", "extended", "probeset"))
+  if(class(object)=="GeneFeatureSet") target <- match.arg(target, c("core", "probeset"))
   if(verbose & class(object)=="ExonFeatureSet") message(paste("Exon summarization at ", target, " level.\n", sep=""))
+  if(verbose & class(object)=="GeneFeatureSet") message(paste("Gene summarization at ", target, " level.\n", sep=""))
 
   if(!background %in% c("none", "rma")) stop("background must be either none or rma")
   if(!normalize %in% c("none", "quantile")) stop("normalize must be either none or quantile")
   if(!summarize %in% c("median_polish", "average", "median", "weighted_average", "robust_weighted_average", "random_effect")) stop("summarize must be one of: median_polish, average, median, weighted_average, robust_weighted_average, random_effect")
 
-  if(summarize=="random_effect" & (any(input.vecs$probeVarBetween==0) | any(input.vecs$probeVarWithin==0))) stop("If summarize method is random_effect then probeVarBetween and probeVarWithin must be greater than zero for all probes.")
-
   if(summarize=="random_effect" & class(object)=="ExonFeatureSet") stop("Summarization method random_effect is not implemented for ExonFeatureSet objects.")
+  if(summarize=="random_effect" & class(object)=="GeneFeatureSet") stop("Summarization method random_effect is not implemented for GeneFeatureSet objects.")
+  if(summarize=="random_effect" & (any(input.vecs$probeVarBetween==0) | any(input.vecs$probeVarWithin==0))) stop("If summarize method is random_effect then probeVarBetween and probeVarWithin must be greater than zero for all probes.")
   
   if(class(object)=="AffyBatch"){
     cdfname <- cleancdfname(cdfName(object))
     platform <- gsub("cdf","",cdfname)
   }
-  if(class(object)=="ExonFeatureSet"){
+  if(class(object)%in%c("ExonFeatureSet","GeneFeatureSet")){
     cdfname <- annotation(object)
-    platform <- paste(cdfname, target, sep="")
+    platform <- gsub("pd.","",cdfname,fixed=TRUE)
   }
 
   if(summarize == "median_polish") output <- frmaMedPol(object, background, normalize, target, input.vecs, verbose)
