@@ -33,7 +33,7 @@ barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=6.5, output
     if(platform=="GPL96") pkg <- "hgu133afrmavecs"
     if(platform=="GPL570") pkg <- "hgu133plus2frmavecs"
     if(platform=="GPL1261") pkg <- "mouse4302frmavecs"
-    require(pkg, character.only=TRUE, quiet=TRUE) || stop(paste(pkg, "package must be installed first"))
+    require(pkg, character.only=TRUE, quietly=TRUE) || stop(paste(pkg, "package must be installed first"))
     data(list=gsub("frma", "barcode", pkg))
     bcparams <- get(gsub("frma", "barcode", pkg))
     if(is.null(mu)){

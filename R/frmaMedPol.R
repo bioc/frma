@@ -43,7 +43,7 @@ frmaMedPol <- function(object, background, normalize, target, input.vecs, verbos
   
   if(is.null(input.vecs$normVec) | is.null(input.vecs$probeVec)){
     pkg <- paste(platform, "frmavecs", sep="")
-    require(pkg, character.only=TRUE, quiet=TRUE) || stop(paste(pkg, "package must be installed first"))
+    require(pkg, character.only=TRUE, quietly=TRUE) || stop(paste(pkg, "package must be installed first"))
     data(list=eval(vecdataname))
 
     if(is.null(input.vecs$normVec)) input.vecs$normVec <- get(vecdataname)$normVec
