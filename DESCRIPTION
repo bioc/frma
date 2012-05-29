@@ -1,10 +1,10 @@
 Package: frma
-Version: 1.9.3
-Date: 2012-05-08
+Version: 1.9.4
+Date: 2012-05-29
 Title: Frozen RMA and Barcode
 Description: Preprocessing and analysis for single microarrays and microarray batches.
 Author: Matthew N. McCall <mccallm@gmail.com>, Rafael A. Irizarry <rafa@jhu.edu>, with contributions from Terry Therneau
-Maintainer: Matthew N. McCall <mmccall@jhsph.edu>
+Maintainer: Matthew N. McCall <mccallm@gmail.com>
 Depends: R (>= 2.10.0), Biobase (>= 2.6.0)
 Imports: Biobase, MASS, DBI, affy, methods, oligo, oligoClasses, preprocessCore, utils, BiocGenerics
 Suggests: hgu133afrmavecs, frmaExampleData 

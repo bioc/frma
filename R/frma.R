@@ -30,15 +30,15 @@ frma <- function(object, background="rma", normalize="quantile", summarize="robu
 
   if(is.null(output.param)){
     if(is.null(output$stderr)){
-      e <- new("ExpressionSet", assayData=assayDataNew(exprs=output$exprs), annotation=platform)
+      e <- new("ExpressionSet", assayData=assayDataNew(exprs=output$exprs), annotation=platform, phenoData=phenoData(object), experimentData=experimentData(object))
     } else{
-      e <- new("ExpressionSet", assayData=assayDataNew(exprs=output$exprs, se.exprs=output$stderr), annotation=platform)
+      e <- new("ExpressionSet", assayData=assayDataNew(exprs=output$exprs, se.exprs=output$stderr), annotation=platform, phenoData=phenoData(object), experimentData=experimentData(object))
     }
   } else {
     if(is.null(output$stderr)){
-      e <- new("frmaExpressionSet", assayData=assayDataNew(exprs=output$exprs), annotation=platform)
+      e <- new("frmaExpressionSet", assayData=assayDataNew(exprs=output$exprs), annotation=platform, phenoData=phenoData(object), experimentData=experimentData(object))
     } else{
-      e <- new("frmaExpressionSet", assayData=assayDataNew(exprs=output$exprs, se.exprs=output$stderr), annotation=platform)
+      e <- new("frmaExpressionSet", assayData=assayDataNew(exprs=output$exprs, se.exprs=output$stderr), annotation=platform, phenoData=phenoData(object), experimentData=experimentData(object))
     }
     if("weights" %in% output.param) w <- output$weights else w <- matrix(nrow=0, ncol=0)
     if("residuals" %in% output.param) r <- output$residuals else r <- matrix(nrow=0, ncol=0)
