@@ -19,19 +19,7 @@ frmaRobReg <- function(object, background, normalize, summarize, target, input.v
   }
 
   if(class(object)%in%c("ExonFeatureSet","GeneFeatureSet")){
-    if(target=="probeset"){
-      featureInfo <- getFidProbeset(object)
-    }
-    if(target=="core"){
-      featureInfo <- getFidMetaProbesetCore(object)
-    }
-    if(target=="full"){
-      featureInfo <- getFidMetaProbesetFull(object)
-    }
-    if(target=="extended"){
-      featureInfo <- getFidMetaProbesetExtended(object)
-    }
-
+    featureInfo <- getFidProbeset(object)
     pmi <- featureInfo[["fid"]]
     pns <- as.character(featureInfo[["fsetid"]])
     pms <- exprs(object)[pmi,, drop=FALSE]
@@ -40,8 +28,13 @@ frmaRobReg <- function(object, background, normalize, summarize, target, input.v
     pms <- pm(object)
     pns <- probeNames(object)
   }
-  
-  if(is.null(input.vecs$normVec) | is.null(input.vecs$probeVec) | is.null(input.vecs$probeVarWithin) | is.null(input.vecs$probeVarBetween) | (summarize=="robust_weighted_average" & is.null(input.vecs$probesetSD))){
+
+  if( is.null(input.vecs$normVec) | is.null(input.vecs$probeVec) |
+     is.null(input.vecs$probeVarWithin) | is.null(input.vecs$probeVarBetween) |
+     (summarize=="robust_weighted_average" & is.null(input.vecs$probesetSD)) |
+     ((is.null(input.vecs$probeVecCore)|is.null(input.vecs$mapCore)) & target=="core") |
+     ((is.null(input.vecs$probeVecExt)|is.null(input.vecs$mapExt)) & target=="extended") |
+     ((is.null(input.vecs$probeVecFull)|is.null(input.vecs$mapFull)) & target=="full") ){
     pkg <- paste(platform, "frmavecs", sep="")
     require(pkg, character.only=TRUE, quietly=TRUE) || stop(paste(pkg, "package must be installed first"))
     data(list=eval(vecdataname))
@@ -50,6 +43,18 @@ frmaRobReg <- function(object, background, normalize, summarize, target, input.v
     if(is.null(input.vecs$probeVec)) input.vecs$probeVec <- get(vecdataname)$probeVec
     if(is.null(input.vecs$probeVarWithin)) input.vecs$probeVarWithin <- get(vecdataname)$probeVarWithin
     if(is.null(input.vecs$probeVarBetween)) input.vecs$probeVarBetween <- get(vecdataname)$probeVarBetween
+    if((is.null(input.vecs$probeVecCore)|is.null(input.vecs$mapCore)) & target=="core"){
+      input.vecs$probeVecCore <- get(vecdataname)$probeVecCore
+      input.vecs$mapCore <- get(vecdataname)$mapCore
+    }
+    if((is.null(input.vecs$probeVecExt)|is.null(input.vecs$mapExt)) & target=="extended"){
+      input.vecs$probeVecExt <- get(vecdataname)$probeVecExt
+      input.vecs$mapExt <- get(vecdataname)$mapExt
+    }
+    if((is.null(input.vecs$probeVecFull)|is.null(input.vecs$mapFull)) & target=="full"){
+      input.vecs$probeVecFull <- get(vecdataname)$probeVecFull
+      input.vecs$mapFull <- get(vecdataname)$mapFull
+    }
     if(is.null(input.vecs$probesetSD) & summarize=="robust_weighted_average" & (class(object)=="AffyBatch" | target=="probeset")) input.vecs$probesetSD <- get(vecdataname)$probesetSD
   }
 
@@ -108,12 +113,73 @@ frmaRobReg <- function(object, background, normalize, summarize, target, input.v
     colnames(stderr) <- sampleNames(object)
   }
 
-  if("residuals" %in% output.param){
-    residuals <- apply(exprs,2,function(x) rep(x, table(pns)))
-    residuals <- (pms-input.vecs$probeVec) - residuals
-    rownames(residuals) <- pns
-    colnames(residuals) <- sampleNames(object)
-  } else residuals <- NULL
+  if(class(object)!="AffyBatch" & target!="probeset"){
+    if(target=="core"){
+      featureInfo <- getFidMetaProbesetCore(object)
+      exonvec <- input.vecs$probeVecCore
+      map <- input.vecs$mapCore
+    }
+    if(target=="full"){
+      featureInfo <- getFidMetaProbesetFull(object)
+      exonvec <- input.vecs$probeVecFull
+      map <- input.vecs$mapFull
+    }
+    if(target=="extended"){
+      featureInfo <- getFidMetaProbesetExtended(object)
+      exonvec <- input.vecs$probeVecExt
+      map <- input.vecs$mapExt
+    }
+    exprs.tmp <- exprs[match(map[,2],rownames(exprs)),,drop=FALSE]
+    pns <- map[,1]
+
+    if(summarize == "average" | summarize == "weighted_average"){  
+      exprs <- subColSummarizeAvg(exprs.tmp - exonvec, pns)
+      weights <- NULL
+      stderr <- NULL
+    }
+
+    if(summarize == "median"){  
+      exprs <- subColSummarizeMedian(exprs.tmp - exonvec, pns)
+      weights <- NULL
+      stderr <- NULL
+    }
+
+    if(summarize == "robust_weighted_average"){
+      N <- 1:dim(exprs.tmp)[1]
+      S <- split(N, pns)
+      fit <- lapply(1:length(S), function(i) {
+	s <- S[[i]]
+        evec.tmp <- exonvec[s]
+        evec.tmp[1] <- evec.tmp[1]-sum(evec.tmp)
+	rcModelPLM(exprs.tmp[s,, drop=FALSE], evec.tmp)
+      })
+      names(fit) <- unique(pns)
+      exprs <- matrix(unlist(lapply(fit, function(x) x$Estimates)), ncol=ncol(exprs.tmp), byrow=TRUE)
+      rownames(exprs) <- names(fit)
+      colnames(exprs) <- colnames(exprs.tmp)
+      if("weights" %in% output.param){
+        weights <- matrix(unlist(lapply(fit, function(x) x$Weights)), ncol=ncol(exprs.tmp), byrow=TRUE)
+        rownames(weights) <- pns
+        colnames(weights) <- sampleNames(object)
+      } else weights <- NULL
+      stderr <- matrix(unlist(lapply(fit, function(x) x$StdErrors)), ncol=ncol(exprs.tmp), byrow=TRUE)
+      rownames(stderr) <- names(fit)
+      colnames(stderr) <- sampleNames(object)
+    }
+    if("residuals" %in% output.param){
+      residuals <- apply(exprs.tmp,2,function(x) rep(x, table(pns)))
+      residuals <- (exprs.tmp - exonvec) - residuals
+      rownames(residuals) <- pns
+      colnames(residuals) <- sampleNames(object)
+    } else residuals <- NULL
+  } else {
+    if("residuals" %in% output.param){
+      residuals <- apply(exprs,2,function(x) rep(x, table(pns)))
+      residuals <- (pms-input.vecs$probeVec) - residuals
+      rownames(residuals) <- pns
+      colnames(residuals) <- sampleNames(object)
+    } else residuals <- NULL
+  }
   
   colnames(exprs) <- sampleNames(object)
   
@@ -128,5 +194,3 @@ rwaFit2 <- function(x1, x2, x3, x4=NULL){
   pe.tmp[1] <- pe.tmp[1]-sum(pe.tmp)
   rcModelWPLM(y=x1, w=w.tmp, row.effects=pe.tmp, input.scale=x4)
 }
-
-
