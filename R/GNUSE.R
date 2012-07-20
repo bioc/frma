@@ -3,11 +3,12 @@ GNUSE <- function(object,medianSE=NULL,type=c("plot","values","stats","density")
   if(length(se.exprs(object))==0) stop("Object does not contain standard errors.")
 
   if(is.null(medianSE)){
-    platform <- annotation(object)
+    platform <- gsub("..entrezg", "", annotation(object))
     pkg <- paste(platform, "frmavecs", sep="")
     require(pkg, character.only=TRUE, quietly=TRUE) || stop(paste(pkg, "package must be installed first"))
-    data(list=eval(pkg))
-    medianSE <- get(pkg)$medianSE
+    vecdataname <- paste(annotation(object), "frmavecs", sep="")
+    data(list=eval(vecdataname))
+    medianSE <- get(vecdataname)$medianSE
   }
 
   if(nrow(se.exprs(object))!=length(medianSE)) stop("nrow(se.exprs(object)) does not equal length(medianSE). This may be caused by ExonFeatureSet or GeneFeatureSet objects not summarized at the probeset level.")

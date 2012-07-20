@@ -7,7 +7,7 @@ barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=6.5, output
   if(is.vector(object)) object <- as.matrix(object)
   
   if(is.matrix(object)){
-    if(is.null(platform)) stop("If object is of class matrix or vector, platform cannot be NULL.")
+    if(is.null(platform) & (is.null(mu) | is.null(tau))) stop("If object is of class matrix or vector, platform cannot be NULL if mu or tau is NULL.")
   }
 
   if(class(object) %in% c("ExpressionSet", "frmaExpressionSet")){
@@ -23,11 +23,6 @@ barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=6.5, output
     object <- as.matrix(exprs(object))
   }
 
-  if(is.null(rownames(object))) stop("Object must have rownames.")
-  
-  i.remove <- grep("AFFX", rownames(object))
-  if(length(i.remove)>0) object <- as.matrix(object[-i.remove,])
-
   if(is.null(mu) | is.null(tau)){
     if(!platform %in% c("GPL96", "GPL570", "GPL1261")) stop("mu and tau must be non-NULL unless platform is one of: GPL96, GPL570, GPL1261")
     if(platform=="GPL96") pkg <- "hgu133afrmavecs"
@@ -36,41 +31,49 @@ barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=6.5, output
     require(pkg, character.only=TRUE, quietly=TRUE) || stop(paste(pkg, "package must be installed first"))
     data(list=gsub("frma", "barcode", pkg))
     bcparams <- get(gsub("frma", "barcode", pkg))
-    if(is.null(mu)){
-      mu <- bcparams$mu
-      names(mu) <- names(bcparams$entropy)
-    }
-    if(is.null(tau)){
-      tau <- bcparams$tau
-      names(tau) <- names(bcparams$entropy)
-    }
+    mu <- bcparams$mu
+    tau <- bcparams$tau
+    names(mu) <- names(tau) <- names(bcparams$entropy)
+  } else{
+    if(length(mu)!=length(tau)) stop("Lengths of mu and tau must be equal.")
   }
 
-  if(platform == "GPL96" & nrow(object)!=22215) stop("Object does not have the correct dimensions for platform GPL96.")
-  if(platform == "GPL570" & nrow(object)!=54613) stop("Object does not have the correct dimensions for platform GPL570.")
-  if(platform == "GPL1261" & nrow(object)!=45037) stop("Object does not have the correct dimensions for platform GPL1261.")
-  
-  if(!identical(rownames(object),names(mu))) stop("Object has different rownames than mean vector, mu.")
-  if(!identical(rownames(object),names(tau))) stop("Object has different rownames than sd vector, tau.")
-    
-  e <- object
-  
+  if(is.null(rownames(object))){
+    warning("Object does not contain rownames; therefore, matching between object and barcode parameters is not guarenteed.")
+    if(nrow(object)!=length(mu)) stop("Number of rows of object does not equal length of barcode parameters (mu and tau).")
+  }
+
+  if(is.null(names(mu)) | is.null(names(tau))){
+    warning("Either mu or tau does not contain names; therefore, matching between object and barcode parameters is not guarenteed.")
+    if(nrow(object)!=length(mu)) stop("Number of rows of object does not equal length of barcode parameters (mu and tau).")
+  } else{
+    if(any(names(mu)!=names(tau))) stop("Names of mu and tau must be identical.")
+  }
+
+  if(!is.null(rownames(object)) & !is.null(names(mu)) & !is.null(names(tau))){
+    i.rm <- which(!rownames(object)%in%names(mu))
+    if(length(i.rm)>0) object <- as.matrix(object[-i.rm,])
+    map <- match(rownames(object),names(mu))
+    mu <- mu[map]
+    tau <- tau[map]
+  }
+
   if(output %in% c("p-value", "lod", "binary")){
-    pval <- pnorm(e, mean=mu, sd=tau, lower.tail=FALSE)
+    pval <- pnorm(object, mean=mu, sd=tau, lower.tail=FALSE)
     if(output == "p-value"){
-      colnames(pval) <- colnames(e)
-      rownames(pval) <- rownames(e)
+      colnames(pval) <- colnames(object)
+      rownames(pval) <- rownames(object)
       return(pval)
     } else{
       lod <- -log10(pval)
       if(output == "lod"){
-        colnames(lod) <- colnames(e)
-        rownames(lod) <- rownames(e)
+        colnames(lod) <- colnames(object)
+        rownames(lod) <- rownames(object)
         return(lod)
       } else{
-        bc <- matrix(as.integer(lod > cutoff), ncol=ncol(e))
-        colnames(bc) <- colnames(e)
-        rownames(bc) <- rownames(e)
+        bc <- matrix(as.integer(lod > cutoff), ncol=ncol(object))
+        colnames(bc) <- colnames(object)
+        rownames(bc) <- rownames(object)
         return(bc)
       }
     }
@@ -78,9 +81,9 @@ barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=6.5, output
 
   if(output == "z-score"){
     ##z <- sweep(sweep(e, 1, mu), 1, tau, FUN="/")
-    z <- (e-mu)/tau
-    colnames(z) <- colnames(e)
-    rownames(z) <- rownames(e)
+    z <- (object-mu)/tau
+    colnames(z) <- colnames(object)
+    rownames(z) <- rownames(object)
     return(z)
   }
 }

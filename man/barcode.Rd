@@ -12,11 +12,12 @@
   \item{object}{a vector or matrix of expression values or an
     ExpressionSet or frmaExpressionSet produced by frma}
   \item{platform}{the platform of the input data. One of GPL96, GPL570,
-    GPL1261. Required if object is a vector or matrix.}
+    GPL1261. Required if object is a vector or matrix and either mu or
+    tau is NULL.}
   \item{mu}{the mean of the unexpressed distribution. If NULL then
-    precomputed values are used.}
+    precomputed values are used if possible.}
   \item{tau}{the standard deviation of the unexpressed distribution. If
-    NULL then precomputed values are used.}
+    NULL then precomputed values are used if possible.}
   \item{cutoff}{the lod score cutoff used if output is binary.}
   \item{output}{the desired values to be returned. Options are: p-value,
     z-score, lod, or binary.}
