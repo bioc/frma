@@ -1,0 +1,38 @@
+citEntry(entry = "Article",
+         author = "Matthew N McCall and Benjamin M Bolstad and Rafael A Irizarry",
+         title = "Frozen robust multiarray analysis (fRMA)",
+         journal = "Biostatistics",
+         volume = "11",
+         number = "2",
+         year = "2010",
+         pages = "242--253",
+         publisher = "Biometrika Trust",
+         textVersion = "McCall MN, Bolstad BM, and Irizarry RA (2010). Frozen Robust Multi-Array Analysis (fRMA), Biostatistics, 11(2):242-253.",
+	 header = "For use of the frma function, please cite:"
+)
+
+citEntry(entry = "Article",
+         author = "Matthew N McCall and Karan Uppal and Harris A Jaffee and Michael J Zilliox and Rafael A Irizarry",
+         title = "The Gene Expression Barcode: leveraging public data repositories to begin cataloging the human and murine transcriptomes",
+         journal = "Nucleic Acids Research",
+         volume = "39",
+         number = "suppl 1",
+         year = "2011",
+         pages = "D1011--D1015",
+         publisher = "Oxford Univ Press",
+         textVersion = "McCall MN, Uppal K, Jaffee HA, Zilliox MJ, and Irizarry RA (2011). The Gene Expression Barcode: leveraging public data repositories to begin cataloging the human and murine transcriptomes, Nucleic Acids Research, 39:D1011-5.",
+	 header = "For use of the barcode function, please cite:"
+)
+
+citEntry(entry = "Article",
+         author = "Matthew N McCall and Peter N Murakami and Margus Lukk and Wolfgang Huber and Rafael A Irizarry",
+         title = "Assessing affymetrix GeneChip microarray quality",
+         journal = "BMC Bioinformatics",
+         volume = "12",
+         number = "1",
+         year = "2011",
+         pages = "137",
+         publisher = "BioMed Central Ltd",
+         textVersion = "McCall MN, Murakami PN, Lukk M, Huber W, Irizarry RA (2011). Assessing Affymetrix GeneChip Microarray Quality, BMC Bioinformatics, 12:137.",
+	 header = "For use of the GNUSE function, please cite:"
+)

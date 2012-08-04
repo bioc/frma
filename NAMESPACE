@@ -14,7 +14,7 @@ importFrom(MASS, rlm)
 importFrom(affy, bg.correct.rma, cleancdfname, ReadAffy, plotDensity)
 importFrom(preprocessCore, normalize.quantiles.use.target, rcModelPLM,
            rcModelWPLM, subColSummarizeAvg, subColSummarizeMedian)
-importFrom(utils, data)
+importFrom(utils, data, citation, toBibtex)
 importFrom(methods, is, callNextMethod, new, setAs, as)
 importFrom(BiocGenerics, weights, residuals)
 
