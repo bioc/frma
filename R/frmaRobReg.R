@@ -167,7 +167,7 @@ frmaRobReg <- function(object, background, normalize, summarize, target, input.v
       colnames(stderr) <- sampleNames(object)
     }
     if("residuals" %in% output.param){
-      residuals <- apply(exprs.tmp,2,function(x) rep(x, table(pns)))
+      residuals <- apply(exprs,2,function(x) rep(x, table(pns)))
       residuals <- (exprs.tmp - exonvec) - residuals
       rownames(residuals) <- pns
       colnames(residuals) <- sampleNames(object)
