@@ -1,3 +1,4 @@
+importFrom(Biobase, phenoData, experimentData)
 importClassesFrom(Biobase, AnnotatedDataFrame, AssayData, eSet,
                   ExpressionSet, MIAME, Versioned, VersionedBiobase,
                   Versions)
