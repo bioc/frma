@@ -18,17 +18,6 @@ frmaRobReg <- function(object, background, normalize, summarize, target, input.v
     if(class(object)%in%c("ExonFeatureSet","GeneFeatureSet")) object <- backgroundCorrect(object, verbose=FALSE)
   }
 
-  if(class(object)%in%c("ExonFeatureSet","GeneFeatureSet")){
-    featureInfo <- getFidProbeset(object)
-    pmi <- featureInfo[["fid"]]
-    pns <- as.character(featureInfo[["fsetid"]])
-    pms <- exprs(object)[pmi,, drop=FALSE]
-  }
-  if(class(object)=="AffyBatch"){
-    pms <- pm(object)
-    pns <- probeNames(object)
-  }
-
   if( is.null(input.vecs$normVec) | is.null(input.vecs$probeVec) |
      is.null(input.vecs$probeVarWithin) | is.null(input.vecs$probeVarBetween) |
      (summarize=="robust_weighted_average" & is.null(input.vecs$probesetSD)) |
@@ -56,6 +45,29 @@ frmaRobReg <- function(object, background, normalize, summarize, target, input.v
       input.vecs$mapFull <- get(vecdataname)$mapFull
     }
     if(is.null(input.vecs$probesetSD) & summarize=="robust_weighted_average" & (class(object)=="AffyBatch" | target=="probeset")) input.vecs$probesetSD <- get(vecdataname)$probesetSD
+  }
+  
+  if(class(object)%in%c("ExonFeatureSet","GeneFeatureSet")){
+    featureInfo <- getFidProbeset(object)
+    pmi <- featureInfo[["fid"]]
+    pns <- as.character(featureInfo[["fsetid"]])
+    pms <- exprs(object)[pmi,, drop=FALSE]
+  }
+  if(class(object)=="AffyBatch"){
+    pms <- pm(object)
+    pns <- probeNames(object)
+    pmi <- unlist(pmindex(object))
+    
+    if(!identical(as.character(pmi),names(input.vecs$normVec))){
+      map = match(as.character(pmi),names(input.vecs$normVec))
+      input.vecs$normVec = input.vecs$normVec[map]
+      input.vecs$probeVec = input.vecs$probeVec[map]
+      input.vecs$probeVarWithin = input.vecs$probeVarWithin[map]
+      input.vecs$probeVarBetween = input.vecs$probeVarBetween[map]
+      if(!identical(as.character(pmi),names(input.vecs$normVec))){
+        stop("Mismatch between pmindex(object) and names of input.vecs and unable to create unique mapping.")
+      }
+    }
   }
 
   if(normalize == "quantile"){
@@ -97,15 +109,14 @@ frmaRobReg <- function(object, background, normalize, summarize, target, input.v
     S <- split(N, pns)
     fit <- lapply(1:length(S), function(i) {
 	s <- S[[i]]
-	rwaFit2(pms[s,, drop=FALSE], w[s], input.vecs$probeVec[s], input.vecs$probesetSD[i]) 
+	rwaFit2(pms[s,, drop=FALSE], w[s], input.vecs$probeVec[s], input.vecs$probesetSD[names(S)[i]]) 
     })
-    names(fit) <- unique(pns)
     exprs <- matrix(unlist(lapply(fit, function(x) x$Estimates)), ncol=ncol(pms), byrow=TRUE)
-    rownames(exprs) <- names(fit)
-    colnames(exprs) <- colnames(pms)
+    rownames(exprs) <- names(S)
+    colnames(exprs) <- sampleNames(object)
     if("weights" %in% output.param){
       weights <- matrix(unlist(lapply(fit, function(x) x$Weights)), ncol=ncol(pms), byrow=TRUE)
-      rownames(weights) <- pns
+      rownames(weights) <- pmi
       colnames(weights) <- sampleNames(object)
     } else weights <- NULL
     stderr <- matrix(unlist(lapply(fit, function(x) x$StdErrors)), ncol=ncol(pms), byrow=TRUE)

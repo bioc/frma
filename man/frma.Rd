@@ -7,9 +7,7 @@
 \usage{
 frma(object, background="rma", normalize="quantile",
     summarize="robust_weighted_average", target="probeset",
-    input.vecs=list(normVec=NULL, probeVec=NULL, probeVarBetween=NULL,
-    probeVarWithin=NULL, probesetSD=NULL), output.param=NULL,
-    verbose=FALSE) 
+    input.vecs=NULL, output.param=NULL, verbose=FALSE) 
 }
 \arguments{
   \item{object}{an AffyBatch, ExonFeatureSet, or GeneFeatureSet}
@@ -22,10 +20,9 @@ frma(object, background="rma", normalize="quantile",
     "robust\_weighted\_average", "random\_effect".}
   \item{target}{summarization level for exon and gene arrays. Must be one of:
     probeset, core, full (exon only), extended (exon only).}
-  \item{input.vecs}{a list of vectors to be used in preprocessing. If
-    necessary elements are NULL, the correct package with the default
-    vectors is loaded if it has been installed. These packages are of
-    the form: <platform>frmavecs.}
+  \item{input.vecs}{a list of vectors to be used in preprocessing. If NULL, 
+    the correct package with pre-made vectors is loaded if it has been installed. 
+    These packages are of the form: <platform>frmavecs.}
   \item{output.param}{a vector of output elements to return. By default
     only the expression values and standard errors (if applicable) are
     returned. Additional options are: "residuals", "weights", "random_effects"}

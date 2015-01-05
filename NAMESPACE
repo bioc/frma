@@ -5,7 +5,7 @@ importClassesFrom(Biobase, AnnotatedDataFrame, AssayData, eSet,
 importClassesFrom(methods, character, matrix)
 importMethodsFrom(methods, initialize)
 importMethodsFrom(Biobase, annotatedDataFrameFrom, exprs, se.exprs, "se.exprs<-", annotation, sampleNames)
-importMethodsFrom(affy, cdfName, pm, "pm<-", probeNames)
+importMethodsFrom(affy, cdfName, pm, "pm<-", pmindex, probeNames)
 importMethodsFrom(oligo, backgroundCorrect)
 importMethodsFrom(oligoClasses, db)
 importMethodsFrom(DBI, dbGetQuery)
@@ -21,4 +21,5 @@ importFrom(BiocGenerics, weights, residuals)
 
 export(frma, barcode, GNUSE)
 exportClasses(frmaExpressionSet)
-exportMethods(initialize, se.exprs, weights, residuals, randomeffects, "se.exprs<-", "weights<-", "residuals<-", "randomeffects<-")
+exportMethods(initialize, se.exprs, weights, residuals, randomeffects, 
+              "se.exprs<-", "weights<-", "residuals<-", "randomeffects<-")
