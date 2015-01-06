@@ -36,3 +36,16 @@ citEntry(entry = "Article",
          textVersion = "McCall MN, Murakami PN, Lukk M, Huber W, Irizarry RA (2011). Assessing Affymetrix GeneChip Microarray Quality, BMC Bioinformatics, 12:137.",
 	 header = "For use of the GNUSE function, please cite:"
 )
+
+citEntry(entry = "Article",
+         author = "Matthew N McCall and Harris A Jaffee and Rafael A Irizarry",
+         title = "fRMA ST: Frozen robust multiarray analysis for Affymetrix Exon and Gene ST arrays",
+         journal = "Bioinformatics",
+         volume = "28",
+         number = "23",
+         year = "2012",
+         pages = "3153-3154",
+         publisher = "Oxford Univ Press",
+         textVersion = "McCall MN, Jaffee HA, Irizarry RA (2012). fRMA ST: Frozen robust multiarray analysis for Affymetrix Exon and Gene ST arrays, Bioinformatics, 28(23):3153-3154.",
+	 header = "For use of the frma function with Gene ST and Exon ST arrays, please also cite:"
+)
