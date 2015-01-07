@@ -1,13 +1,20 @@
 barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=6.5, output="binary"){
 
-  if(!class(object) %in% c("matrix", "ExpressionSet", "frmaExpressionSet") & !is.vector(object)) stop("Object must be one of: vector, matrix, ExpressionSet, or frmaExpressionSet.")
+  if(!class(object) %in% c("matrix", "ExpressionSet", "frmaExpressionSet")
+     & !is.vector(object)){
+      stop("Object must be one of: vector, matrix, ExpressionSet, or frmaExpressionSet.")
+  }
 
-  if(!output %in% c("binary", "z-score", "p-value", "lod")) stop("Output must be one of: binary, z-score, p-value, lod.") 
+  if(!output %in% c("binary", "z-score", "p-value", "lod")){
+      stop("Output must be one of: binary, z-score, p-value, lod.")
+  }
 
   if(is.vector(object)) object <- as.matrix(object)
   
   if(is.matrix(object)){
-    if(is.null(platform) & (is.null(mu) | is.null(tau))) stop("If object is of class matrix or vector, platform cannot be NULL if mu or tau is NULL.")
+    if(is.null(platform) & (is.null(mu) | is.null(tau))){
+        stop("If object is of class matrix or vector, platform cannot be NULL if mu or tau is NULL.")
+    }
   }
 
   if(class(object) %in% c("ExpressionSet", "frmaExpressionSet")){
@@ -56,7 +63,7 @@ barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=6.5, output
   if(is.null(names(mu)) | is.null(names(tau))){
     warning("Either mu or tau does not contain names; therefore, matching between object and barcode parameters is not guarenteed.")
   } else{
-    if(any(names(mu)!=names(tau))) stop("Names of mu and tau must be identical.")
+    if(!identical(names(mu),names(tau))) stop("Names of mu and tau must be identical.")
   }
 
   if(nrow(object)!=length(mu)){

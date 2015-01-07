@@ -12,8 +12,8 @@
   \item{object}{a vector or matrix of expression values or an
     ExpressionSet or frmaExpressionSet produced by frma}
   \item{platform}{the platform of the input data. One of GPL96, GPL570,
-    GPL1261. Required if object is a vector or matrix and either mu or
-    tau is NULL.}
+    GPL571, GPL1261, GPL6244, GPL6246. Required if object is a vector or
+    matrix and either mu or tau is NULL.}
   \item{mu}{the mean of the unexpressed distribution. If NULL then
     precomputed values are used if possible.}
   \item{tau}{the standard deviation of the unexpressed distribution. If

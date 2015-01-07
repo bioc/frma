@@ -14,6 +14,7 @@
 \evensidemargin=.1in
 \headheight=-.3in
 
+\newcommand{\R}{{$\mathbf{R}$}}
 \newcommand\Rpackage[1]{{\textsf{#1}\index{#1 (package)}}}
 \newcommand\dataset[1]{{\textit{#1}\index{#1 (data set)}}}
 \newcommand\Rclass[1]{{\textit{#1}\index{#1 (class)}}}
@@ -24,150 +25,180 @@
 \author{Matthew N. McCall}
 
 \begin{document}
-\title{Preprocessing and Barcoding of Single Microarrays and Microarray Batches (frma)}
+\title{Frozen Robust Multi-Array Analysis and the Gene Expression Barcode}
 \maketitle
 \tableofcontents
+
+The \Rpackage{frma} implements methods for the preprocessing (frma)
+and analysis (barcode) of single microarrays. The fRMA algorithm
+allows the user to preprocess arrays individually while retaining the
+advantages of multi-array preprocessing methods such as RMA. The Gene
+Expression Barcode provides estimates of absolute expression rather
+than relative expression.
 
 \section{Frozen Robust Multiarray Analysis (fRMA)}
 Frozen RMA (fRMA) is a microarray preprocessing algorithm that allows
 one to analyze microarrays individually or in small batches and then
 combine the data for analysis. This is accomplished by utilizing
-information from the large publicly available microarray databases. In
-particular, estimates of probe-specific effects and variances are
-precomputed and frozen. Then, with new data sets, these are used in
-concert with information from the new array(s) to normalize and
-summarize the data. 
+information from the large publicly available microarray
+databases. Specifically, estimates of probe-specific effects and
+variances are precomputed and frozen. Then, with new data sets, these
+frozen parameters are used in concert with information from the new
+array(s) to preprocess the data.
 
-This section describes \Rfunction{frma}, which implements the methods
-proposed in the paper, \emph{Matthew N. McCall, Benjamin M. Bolstad,
-and Rafael A. Irizarry, ``FROZEN ROBUST MULTI-ARRAY ANALYSIS (fRMA)''
-(May 2009). Johns Hopkins University, Dept. of Biostatistics Working
-Papers. Working Paper 189.} Ideally someone interested in using this
-package would first read that paper and then proceed to the sections
-below.
+The fRMA is particularly useful when it is not feasible to preprocess
+all of the data simultaneously. Such situations often arise when:
+\begin{itemize}
+  \item large meta-analyses require one to preprocess more data than
+    can be stored in memory,  
+  \item datasets grow incrementally and it would be laborious to
+    preprocess all of the data each time a new array is added,
+  \item microarrays are used to aid in clinical diagnosis and treatment, one
+    needs to obtain information based on a single sample hybridized to
+    a single microarray.
+\end{itemize}    
+Additionally, fRMA down-weights probes that appear to be
+\emph{batchy}, those that are most susceptible to batch-effects.
 
-\subsection{Getting Started}
+\subsection{From CEL files to expression estimates}
+For Affymetrix microarray data, it is customary to view CEL files as
+the starting point for preprocessing and analysis. One or more CEL
+files can be read into \R{} using the \Rfunction{ReadAffy} function
+from the \Rpackage{affy} package to produce an \Robject{AffyBatch}
+object or using the \Rfunction{read.celfiles} function from the
+\Rpackage{oligo} to produce a \Robject{FeatureSet}. 
 
-If all you want is to go from probe level data ({\it CEL} files) to
-expression measures here are some quick ways.
+The goal of fRMA is to obtain reliable gene-level intensities from the
+raw microarray data. This amounts to converting raw probe-level
+intensities into background-corrected, normalized, and summarized
+gene-level intensities. The \Rfunction{frma} function takes an
+\Robject{AffyBatch} or \Robject{FeatureSet} as input and produces an
+object containing gene-level expression values. This object can take
+one of two forms, an \Robject{ExpressionSet} or a
+\Robject{frmaExpressionSet}, depending upon the additional information
+that is requested. The gene-level intensities stored in both these
+objects can be accessed using the \Rfunction{exprs} method.  
 
-\subsubsection{Single Array: Median Polish}
-If you want a quick single array version of RMA using median polish,
-the quickest way of reading in data and getting expression measures is
-the following:
+In addition to the raw data, the fRMA algorithm requires a number of
+\emph{frozen} parameter vectors. Among these are the reference
+distribution to which the data are normalized and the probe-effect
+estimates. We have computed these frozen parameters for many popular
+Affymetrix platforms. The data for each of these platforms is stored
+in an \R{} package of the form \Rpackage{$<$platform$>$frmavecs}. By
+default, the \Rfunction{frma} function attempts to load the
+appropriate data package for the input data object.
+
+The remainder of this section describes typical use of the
+\Rfunction{frma}. For details of the statistical methodology
+implemented in the frma function, please read the following papers:
+
+McCall MN, Bolstad BM, and Irizarry RA (2010). Frozen Robust
+Multi-Array Analysis (fRMA), Biostatistics, 11(2):242-253.
+
+McCall MN, Jaffee HA, Irizarry RA (2012). fRMA ST: Frozen robust
+multiarray analysis for Affymetrix Exon and Gene ST arrays,
+Bioinformatics, 28(23):3153-3154.
+
+The following is a simple description of how to preprocess a single CEL file using the default version of frma:
 \begin{enumerate}
-\item Download and install frma and the appropriate data file (i.e. hgu133afrmavecs, hgu133plus2frmavecs, etc.).
-\item Create a directory and move all the relevant
-{\it CEL} files to that directory.
-\item If using linux/unix, start R in that directory.
-\item If using the Rgui for 
-Microsoft Windows make sure your working directory contains the {\it
-CEL} files (use ``File -> Change Dir'' menu item).
-\item Load the library.
+\item Download and install frma and the appropriate frozen parameter package (i.e. hgu133afrmavecs, hgu133plus2frmavecs, etc.).
+\item Load the frma package.
 <<echo=T,results=hide>>=
 library(frma)
 @ 
-\item Read in the data and preprocess using the ``median\_polish'' option.
+\item Read in the data as either an \Robject{AffyBatch} or \Robject{FeatureSet}
+  object. For the early Affymetrix platforms (e.g. HGU133plus2), you
+  should use the \Rfunction{ReadAffy} function from the
+  \Rpackage{affy} package to read in the CEL files. For the later
+  Affymetrix platforms (e.g. Gene ST or Exon ST), you should use the
+  \Rfunction{read.celfiles} function from the \Rpackage{oligo} package.
+\item In this vignette we will load an example \Robject{AffyBatch} object:  
 <<echo=T,results=hide>>=
 library(frmaExampleData)
 data(AffyBatchExample)
-object <- frma(AffyBatchExample, summarize="median_polish")
+@ 
+\item Preprocess the raw data object using the default version of frma.
+<<echo=T,results=hide>>=
+object <- frma(AffyBatchExample)
 @ 
 \end{enumerate}
 
-\subsubsection{Single Array: Robust Weighted Average}
-If you want the robust single array method described in the fRMA
-paper, the quickest way of reading in data and getting expression
-measures is the following:
-\begin{enumerate}
-\item Download and install frma and the appropriate data file (i.e. hgu133afrmavecs, hgu133plus2frmavecs, etc.).
-\item Create a directory and move all the relevant
-{\it CEL} files to that directory.
-\item If using linux/unix, start R in that directory.
-\item If using the Rgui for 
-Microsoft Windows make sure your working directory contains the {\it
-CEL} files (use ``File -> Change Dir'' menu item).
-\item Load the library.
-<<echo=T,results=hide>>=
-library(frma)
-@ 
-\item Read in the data and preprocess using the ``robust\_weighted\_average'' option.
-<<echo=T,results=hide>>=
-library(frmaExampleData)
-data(AffyBatchExample)
-object <- frma(AffyBatchExample, summarize="robust_weighted_average")
-@ 
-\end{enumerate}
-
-\subsubsection{Multiple Arrays: Random Effect Model}
-If you want to preprocess a batch of arrays using the model described
-in the fRMA paper, the quickest way of reading in data and getting
-expression measures is the following:
-\begin{enumerate}
-\item Download and install frma and the appropriate data file (i.e. hgu133afrmavecs, hgu133plus2frmavecs, etc.).
-\item Create a directory and move all the relevant
-{\it CEL} files to that directory.
-\item If using linux/unix, start R in that directory.
-\item If using the Rgui for 
-Microsoft Windows make sure your working directory contains the {\it
-CEL} files (use ``File -> Change Dir'' menu item).
-\item Load the library.
-<<echo=T,results=hide>>=
-##library(frma)
-@ 
-\item Read in the data and preprocess using the ``random\_effect'' option.
-<<echo=T,results=hide>>=
-##library(frmaExampleData)
-##data(AffyBatchExample)
-##object <- frma(AffyBatchExample, summarize="random_effect")
-@ 
-\end{enumerate}
-
-In each of the cases above, the final \Robject{object} will be an ExpressionSet. To obtain a matrix of gene-level expression values, enter the
-following command:
+The final \Robject{object} will be an \Robject{ExpressionSet} or
+\Robject{frmaExpressionSet}. The latter is an extension of the
+ExpressionSet class to hold additional information related to the
+preprocessing procedure such as weights and residuals. To obtain a
+matrix of gene-level expression values, enter the following command:
 <<echo=T,results=hide>>=
 e <- exprs(object)
 @ 
 
-Depending on the size of your dataset and on the memory available to
+To assess the quality of the expression estimates, one can use the \Rfunction{GNUSE} function:
+<<echo=T,results=show>>=
+GNUSE(object,type="stats)
+@ 
+The GNUSE is a modification of the NUSE quality metric that allows
+one to assess the quality of individual samples relative to the large
+training data set used to compute the frozen parameter vectors. The
+GNUSE is described in more detail in the following paper:
+
+McCall MN, Murakami PN, Lukk M, Huber W, Irizarry RA (2011). Assessing
+Affymetrix GeneChip Microarray Quality, BMC Bioinformatics, 12:137.
+
+Depending on the number of CEL files and on the memory available to
 your system, you might experience errors like `Cannot allocate vector
 \ldots'.  An obvious option is to increase the memory available to
 your R process (by adding memory and/or closing external
 applications). You might also consider analyzing the data in smaller
-batches.
+batches. Recall that fRMA allows you to preprocess data separately and
+then combine the preprocessed data for further analysis.
 
 \subsection{Advanced Options}
+The default arguments to the \Rfunction{frma} function will be
+sufficient for most users; however, additional options have been
+implemented to allow the user to control each stage of the
+preprocessing, as well as, the information returned by the
+\Rfunction{frma} function. This flexibility is instrumental in
+allowing users to easily explore alternative methods of preprocessing.
+
 \subsubsection{Summarization Methods}
 \emph{Summarization} refers to the method used to combine probe-level
 expression values to obtain gene-level expression estimates. There are
 several summarization methods that one can choose from when running
 frma. A brief description of each of the methods follow:
 \begin{itemize}
-  \item {\bf{average}:} compute the mean of the probes in each probeset
-  \item {\bf{median}:} compute the median of the probes in each probeset
-  \item {\bf{median\_polish}:} subtract the probe-effect and then compute the median of the probes in each probeset
+  \item {\bf{average}:} subtract the probe-effect and then compute the mean of the probes in each probeset.
+  \item {\bf{median}:} subtract the probe-effect and compute the median of the probes in each probeset.
+  \item {\bf{median\_polish}:} this is the same as the median summarization because the probe-effects have already been removed.
   \item {\bf{weighted average}:} compute a weighted average of the probes in each probeset with weights equal to the inverse of the sum of the precomputed within and between batch variance estimates.
   \item {\bf{robust\_weighted\_ average}:} compute a weighted average of the probes in each probeset with weights equal to the weights returned by an M-estimation procedure divided by the sum of the precomputed within and between batch variance estimates. 
-  \item {\bf{random\_ effect}:} the robust weighted average method adapted for a batch of new arrays.
+  \item {\bf{random\_ effect}:} the robust weighted average method adapted for a batch of new arrays (see the fRMA paper for details).
 \end{itemize}
-
-For a more in depth description of the final two methods, see
-\emph{Matthew N. McCall, Benjamin M. Bolstad, and Rafael A. Irizarry,
-``FROZEN ROBUST MULTI-ARRAY ANALYSIS (fRMA)'' (May 2009). Johns
-Hopkins University, Dept. of Biostatistics Working Papers. Working
-Paper 189.}
 
 \subsubsection{Input Vectors}
-While the vast majority of users will want to stick to the precomputed vectors provided in the frmavecs packages, the frma function will accept user-supplied vectors. These should be given in a list with elements normVec, probeVec, probeVarBetween, probeVarWithin, and probesetSD. A description of each of these elements follows:
-\begin{itemize}
-  \item {\bf{normVec}:} a vector containing values of the reference distribution to which samples will be quantile normalized.
-  \item {\bf{probeVec}:} a vector of probe-effect estimates.
-  \item {\bf{probeVarBetween}:} a vector of the between batch variance for each probe.
-  \item {\bf{probeVarWithin}:} a vector of the within batch variance for each probe.
-  \item {\bf{probesetSD}:} a vector of average within probeset standard deviations.
-\end{itemize}
+While the vast majority of users will use the precomputed vectors
+provided in the \Rpackage{frmavecs} packages, the \Rfunction{frma}
+function will accept user-supplied frozen parameter vectors. The
+\Rpackage{frmaTools} package contains functions to create your own
+frozen parameter vectors. There are several situations in which
+creating your own frozen parameter vectors may be beneficial. These
+are described in detail in:
 
-For further information on how these vectors are computed in the frmavecs packages, see the frmaTools package.
+McCall MN and Irizarry RA (2011). Thawing Frozen Robust Multi-array
+Analysis (fRMA), BMC Bioinformatics, 12:369.
+
+If you create your own frozen parameter vectors using functions in the
+\Rpackage{frmaTools} package, the vectors will already be in the
+correct format: a list with elements normVec, probeVec,
+probeVarBetween, probeVarWithin, probesetSD, and medianSE. A
+description of each of these elements follows:
+\begin{itemize}
+  \item {\bf{normVec}:} a vector containing values of the reference distribution to which samples will be quantile normalized
+  \item {\bf{probeVec}:} a vector of probe-effect estimates
+  \item {\bf{probeVarBetween}:} a vector of the between batch variance for each probe
+  \item {\bf{probeVarWithin}:} a vector of the within batch variance for each probe
+  \item {\bf{probesetSD}:} a vector of average within probeset standard deviations
+  \item {\bf{medianSE}:} a vector of median standard errors of the expression estimates (used by the GNUSE function)
+\end{itemize}
 
 \subsubsection{Output Parameters}
 While the default is to only return the gene-level expression
@@ -176,59 +207,63 @@ can also return additional information about the estimates depending
 on the summarization method chosen. A description of the arguments
 that can be included in the output.param argument follows:
 \begin{itemize}
-  \item {\bf{weights}:} the weights from the M-estimation procedure.
-  \item {\bf{residuals}:} the residuals from fitting the probe-level model.
-  \item {\bf{randomeffects}:} estimated random effects from fitting the probe-level model with random effect summarization.
+  \item {\bf{weights}:} the weights from the M-estimation procedure
+  \item {\bf{residuals}:} the residuals from fitting the probe-level model
+  \item {\bf{randomeffects}:} estimated random effects from fitting the probe-level model with random effect summarization
 \end{itemize}
 
-Not all of these outputs are available for all of the summarization
+Note that not all of these outputs are available for all of the summarization
 methods.
 
 \section{Creation of Gene Expression Barcodes}
 The barcode algorithm is designed to estimate which genes are
 expressed and which are unexpressed in a given microarray
-hybridization. This is accopmlished by: (1) using the distribution of
+hybridization. This is accomplished by: (1) using the distribution of
 observed $log_2$ intensities across a wide variety of tissues to
 estimate an expressed and an unexpressed distribution for each gene,
-and (2) for each gene in a sample, denoting it as expressed if its
-observed $log_2$ intensity is more likely under the expressed
-distribution than under the unexpressed distribution and as
-unexpressed otherwise. The first step is accomplished by fitting a
-hierarchical mixture model to the plethora of publicly available
-data. The second step is accomplished by determining where the
-observed intensities from the new array fall in these
-distributions. The output of our algorithm is a vector of ones and
-zeros denoting which genes are estimated to be expressed (ones) and
-unexpressed (zeros). We call this a \emph{gene expression barcode}.
+and (2) using these estimated distributions to determine which genes
+are expressed / unexpressed in a given sample. The first step is
+accomplished by fitting a hierarchical mixture model to the plethora
+of publicly available data. The second step is accomplished by
+determining where the observed intensities from the new array fall in
+the estimated distributions. The default output of the
+\Rfunction{barcode} function is a vector of ones and zeros denoting
+which genes are estimated to be expressed (ones) and unexpressed
+(zeros). We call this a \emph{gene expression barcode}.
 
-This section describes \Rfunction{barcode}, which implements the
-methods proposed in the paper, \emph{Matthew N. McCall, Michael
-J. Zilliox, and Rafael A. Irizarry, ``Gene Expression Barcodes Based
-on Data from 8,277 Microarrays'' (October 2009). Johns Hopkins
-University, Dept. of Biostatistics Working Papers. Working Paper 200.}
-Ideally someone interested in using this package would first read that
-paper and then proceed to the sections below.
+For more details about the Gene Expression Barcode, please read the following papers:
+
+McCall MN, Uppal K, Jaffee HA, Zilliox MJ, and Irizarry RA (2011). The
+Gene Expression Barcode: leveraging public data repositories to begin
+cataloging the human and murine transcriptomes, Nucleic Acids
+Research, 39:D1011-D1015.
+
+McCall MN, Jaffee HA, Zelisko SJ, Sinha N, Hooiveld G, Irizarry RA,
+Zilliox MJ (2014). The Gene Expression Barcode 3.0: improved data
+processing and mining tools, Nucleic Acids Research, 42(D1):D938-D943.
 
 \subsection{Getting Started}
 To create a gene expression barcode, one needs estimates of the gene
 expression distributions -- specifically the mean and variance of the
-unexpressed distribution for each gene. Fortunately, we have
-precomputed these for 3 popular Affymetrix microarray platforms --
-hgu133a, hgu133plus2, and mouse4302. To use one of these 3, simply
+unexpressed distribution for each gene. We have computed these for
+several popular Affymetrix platforms. To use one of these, simply
 preprocess your data using the default options of \Rfunction{frma} and
-then run \Rfunction{barcode} on the resulting object.
+then run the \Rfunction{barcode} function on the resulting object.
+
+Similar to the \Rfunction{frma} function, the \Rfunction{barcode}
+function requires platform specific precomputed parameters. These
+parameters are stored in the same \R{} packages as the frozen
+parameter vectors used by \Rfunction{frma}. In the default
+implementation, the \Rfunction{barcode} function attempts to load the
+appropriate set of parameters for the given \Robject{ExpressionSet} or
+\Robject{frmaExpressionSet} object. It is also possible for the user
+to supply the necessary parameters via optional arguments.
 
 \subsubsection{Example}
 \begin{enumerate}
 \item Download and install the frma package and the appropriate data
 package(s) (i.e. hgu133afrmavecs).
-\item Create a directory and move all the relevant
-{\it CEL} files to that directory.
-\item If using linux/unix, start R in that directory.
-\item If using the Rgui for Microsoft Windows make sure your working
-directory contains the {\it CEL} files (use ``File -> Change Dir''
-menu item).
-\item Load the libraries.
+\item Load the frma package.
 <<echo=T,results=hide>>=
 library(frma)
 @ 
@@ -238,7 +273,7 @@ library(frmaExampleData)
 data(AffyBatchExample)
 object <- frma(AffyBatchExample)
 @ 
-\item Create a gene expression barcode.
+\item Convert the expression values to a gene expression barcode.
 <<echo=T,results=hide>>=
 bc <- barcode(object)
 @ 
@@ -251,9 +286,8 @@ The default output of the \Rfunction{barcode} function is to return a vector of 
   \item {\bf{weight}:} a vector of weights which roughly correspond to the probability of expression for each gene.
   \item {\bf{z-score}:} a vector of z-scores under the unexpressed normal distribution for each gene.
   \item {\bf{p-value}:} a vector of p-values under the unexpressed normal distributionfor each gene.
+  \item {\bf{lod}:} a vector of LOD scores under the unexpressed normal distributionfor each gene.
 \end{itemize}
-
-
 
 \end{document}
 
