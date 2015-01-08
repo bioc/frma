@@ -70,6 +70,15 @@ barcode <- function(object, platform=NULL, mu=NULL, tau=NULL, cutoff=6.5, output
       if(platform %in% c("GPL6244", "GPL6246")) message("The following error can likely be fixed by setting target=\"core\" in the frma function.")
       stop("Number of rows / features of object does not equal length of barcode parameters (mu and tau).")
   }
+
+  if((!is.null(rownames(object))) & (!is.null(names(mu))) & (!is.null(names(tau)))){
+      map <- match(rownames(object),names(mu))
+      mu <- mu[map]
+      tau <- tau[map]
+      if(!identical(rownames(object), names(mu))){
+          stop("Mismatch between rownames of data object and names of mu and unable to create unique mapping.")
+      }
+  }
   
   if(output %in% c("p-value", "lod", "binary")){
     pval <- pnorm(object, mean=mu, sd=tau, lower.tail=FALSE)
