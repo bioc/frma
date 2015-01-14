@@ -133,8 +133,8 @@ e <- exprs(object)
 @ 
 
 To assess the quality of the expression estimates, one can use the \Rfunction{GNUSE} function:
-<<echo=T,results=show>>=
-GNUSE(object,type="stats)
+<<echo=T,results=verbatim>>=
+GNUSE(object,type="stats")
 @ 
 The GNUSE is a modification of the NUSE quality metric that allows
 one to assess the quality of individual samples relative to the large

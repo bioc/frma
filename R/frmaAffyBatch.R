@@ -82,8 +82,8 @@ frmaAffyBatch <- function(object, background, normalize, summarize, input.vecs, 
     })
     
     if("random_effects" %in% output.param){
-      gammas <- matrix(unlist(lapply(fit, function(x) x$gamma)), ncol=1)
-      rownames(gammas) <- pns
+      gammas <- matrix(unlist(lapply(fit, function(x) x$Gamma)), ncol=1)
+      rownames(gammas) <- pmi
       colnames(gammas) <- NULL
     } else gammas <- NULL
     
