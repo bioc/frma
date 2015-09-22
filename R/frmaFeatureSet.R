@@ -25,10 +25,11 @@ frmaFeatureSet <- function(object, background, normalize, summarize, target, inp
     stderr <- NULL
   }
   
-  if(summarize == "median"){  
-    exprs <- subColSummarizeMedian((pms-input.vecs$probeVec), pns)
-    weights <- NULL
-    stderr <- NULL
+  if(summarize %in% c("median","median_polish")){
+      if(summarize == "median_polish") message("Note: median and median_polish summarization methods are identical in fRMA.\n")
+      exprs <- subColSummarizeMedian((pms-input.vecs$probeVec), pns)
+      weights <- NULL
+      stderr <- NULL
   }
   
   if(summarize == "weighted_average"){  
@@ -91,10 +92,10 @@ frmaFeatureSet <- function(object, background, normalize, summarize, target, inp
       stderr <- NULL
     }
     
-    if(summarize == "median"){  
-      exprs <- subColSummarizeMedian(exprs.tmp - exonvec, pns)
-      weights <- NULL
-      stderr <- NULL
+    if(summarize %in% c("median","median_polish")){
+        exprs <- subColSummarizeMedian(exprs.tmp - exonvec, pns)
+        weights <- NULL
+        stderr <- NULL
     }
     
     if(summarize == "robust_weighted_average"){
